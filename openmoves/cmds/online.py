@@ -20,16 +20,13 @@ class online(template):
         self.parentList = []
         self.pairs = []
         self.ids = []
-        self.dersList = []
-        self.seconddersList = []
+        self.xdersList = []
+        self.ydersList = []
+        self.xseconddersList = []
+        self.yseconddersList = []
 
         self.allX = []
         self.allY = []
-
-        self.dxt = []
-        self.dyt = []
-        self.ddxt = []
-        self.ddyt = []
 
     def pairwise(X, Y):
         tempPairs = []
@@ -77,9 +74,12 @@ class online(template):
                 allids = [singletrack[0] for singletrack in trackData]
                 for singleID in allids:
                     if singleID not in ids:
-                        ids.append(singleID)
-                        parentList.append([singleID])
-                        dersList.append([singleID])
+                        self.ids.append(singleID)
+                        self.parentList.append([singleID])
+                        self.xdersList.append([singleID])
+                        self.ydersList.append([singleID])
+                        self.xseconddersList.append([singleID])
+                        self.yseconddersList.append([singleID])
                 
                 #append each track to appropriate list
                 for singleID in allids:
@@ -88,15 +88,20 @@ class online(template):
                         if(singletrack[0] == singleID):
                             del singletrack[0]
                             childList = singletrack
-                    idx = ids.index(singleID)
-                    parentList[idx].append(childList)
+                    idx = self.ids.index(singleID)
+                    self.parentList[idx].append(childList)
 
                     #take derivatives as generated
-                    if len(parentList[idx]) > 2:
+                    if len(self.parentList[idx]) > 2:
                         x = childList[0]
                         y = childList[1]
-                        prevpoint = parentList[idx][len(parentList[idx])-2]
-                        dersList[idx].append((y - prevpoint[1])/(x-prevpoint[0]))
+                        prevpoint = self.parentList[idx][len(self.parentList[idx])-2]
+                        self.xdersList[idx].append((x-prevpoint[0])/self.PERIOD)
+                        self.ydersList[idx].append((y-prevpoint[1])/self.PERIOD)
+                        self.xseconddersList[idx].append(((self.xdersList[idx][0] - 
+                            self.xdersList[idx-1][0])/self.PERIOD))
+                        self.yseconddersList[idx].append(((self.ydersList[idx][1] - 
+                            self.ydersList[idx-1][1])/self.PERIOD))
                         #ders.append((mx[i]-mx[i-1])/dt)
                 
                 currX = [point[0] for point in trackData]
@@ -106,8 +111,8 @@ class online(template):
                 for x in range(10):
                     currXY.append([currX[x], currY[x]])
 
-                allX.append(currX)
-                allY.append(currY)
+                self.allX.append(currX)
+                self.allY.append(currY)
 
                 #get clusters
                 af = AffinityPropagation().fit(currXY)
@@ -119,7 +124,7 @@ class online(template):
 
                 #plot paths & points
                 for i in range(10):
-                    plt.plot([item[i] for item in allX], [item[i] for item in allY], zorder=-1)
+                    plt.plot([item[i] for item in self.allX], [item[i] for item in self.allY], zorder=-1)
   
                 plt.scatter(currX, currY, zorder=3)
                 

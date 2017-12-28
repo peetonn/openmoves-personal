@@ -45,8 +45,10 @@ class sample(template):
         self.parentList = []
         self.pairs = []
         self.ids = []
-        self.dersList = []
-        self.seconddersList = []
+        self.xdersList = []
+        self.ydersList = []
+        self.xseconddersList = []
+        self.yseconddersList = []
 
         self.allX = []
         self.allY = []
@@ -279,10 +281,19 @@ class sample(template):
     #Take covariance-method PCA, get sort of 
     #most likely arrangement of people
     def pca():
+        #take cov matrices & evals/evects
         xcov, ycov = covarianceind()
-        ex, vx = eig(xcov)
-        ey, vy = eig(ycov)
+        ex, vx = np.eig(xcov)
+        ey, vy = np.eig(ycov)
 
+        #pair and sort the eigenvectors with respective eigenvalues
+        expairs = [(np.abs(ex[i]), vx[:,i]) for i in range(len(ex))]
+        eypairs = [(np.abs(ey[i]), vy[:,i]) for i in range(len(ex))]
+        expairs.sort(key=lambda x: x[0], reverse=True)
+        eypairs.sort(key=lambda x: x[0], reverse=True)
+
+        #return greatest of each
+        return expairs[0], eypairs[0]
 
     def run(self):
         plt.ion()
@@ -336,7 +347,10 @@ class sample(template):
                     if singleID not in self.ids:
                         self.ids.append(singleID)
                         self.parentList.append([singleID])
-                        self.dersList.append([singleID])
+                        self.xdersList.append([singleID])
+                        self.ydersList.append([singleID])
+                        self.xseconddersList.append([singleID])
+                        self.yseconddersList.append([singleID])
                 
                 #append each track to appropriate list
                 for singleID in allids:
@@ -353,9 +367,12 @@ class sample(template):
                         x = childList[0]
                         y = childList[1]
                         prevpoint = self.parentList[idx][len(self.parentList[idx])-2]
-                        self.dersList[idx].append((y - prevpoint[1])/(x-prevpoint[0]))
-                        self.seconddersList[idx].append(((self.dersList[idx][1] - 
-                            self.dersList[idx-1][1])/(self.dersList[idx][0]-self.dersList[idx-1][0])))
+                        self.xdersList[idx].append((x-prevpoint[0])/self.PERIOD)
+                        self.ydersList[idx].append((y-prevpoint[1])/self.PERIOD)
+                        self.xseconddersList[idx].append(((self.xdersList[idx][0] - 
+                            self.xdersList[idx-1][0])/self.PERIOD))
+                        self.yseconddersList[idx].append(((self.ydersList[idx][1] - 
+                            self.ydersList[idx-1][1])/self.PERIOD))
                         #ders.append((mx[i]-mx[i-1])/dt)
                 
                 currX = [point[0] for point in trackData]
