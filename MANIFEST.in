@@ -1,0 +1,9 @@
+exclude .gitignore
+
+include README.txt
+include setup.cfg
+
+prune .cache
+prune .git
+
+recursive-include tests *

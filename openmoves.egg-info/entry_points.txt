@@ -1,0 +1,3 @@
+[console_scripts]
+openmoves = openmoves.cli:main
+

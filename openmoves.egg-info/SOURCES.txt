@@ -1,0 +1,8 @@
+MANIFEST.in
+README.txt
+setup.cfg
+openmoves.egg-info/PKG-INFO
+openmoves.egg-info/SOURCES.txt
+openmoves.egg-info/dependency_links.txt
+openmoves.egg-info/entry_points.txt
+openmoves.egg-info/top_level.txt
