@@ -110,6 +110,7 @@ class sample(template):
         
         return tempPairs
 
+    """below functions not called in run due to reorganizing"""
     def covariance(): #ignore entries of resulting matrix with indicies not both odd or even
         #todo: keep track of longest length for zero padding / otherwise account for different n in each timestep  
         #create a matrix such that each column is the x or y of a particular actor
@@ -137,9 +138,9 @@ class sample(template):
             truecov.append(currrow)
         return truecov
 
-    def covarianceind():
-        covX = np.cov(np.asarray(self.allX).T)
-        covY = np.cov(np.asarray(self.allY).T)
+    def covarianceind(x, y):
+        covX = np.cov(np.asarray(x).T)
+        covY = np.cov(np.asarray(y).T)
 
         return covX, covY
 
@@ -188,33 +189,6 @@ class sample(template):
     def classify(live, template, window):
         pass
 
-    """
-    #multivariate R implementation, rpy2 dtw:
-    def dtwrpy(x1, x2):
-        import rpy2.robjects.numpy2ri
-        rpy2.robjects.numpy2ri.activate()
-        from rpy2.robjects.packages import importr
-        import rpy2.robjects as robj
-
-        #get shape of arrays and convert them to R matrices
-        rx1, cx1 = x1.shape
-        rx2, cx2 = x2.shape
-        x1R = R.matrix(x1, nrow=rx1, ncol=cx1)
-        x2R = R.matrix(x2, nrow=rx2, ncol=cx2)
-
-        #do the alignment
-        alignment = R.dtw(x1R, x2R, keep=True, step_pattern=R.rabinerJuangStepPattern(4,"c"), open_begin=True, open_end=True)
-        dist = alignment.rx('distance')[0][0]
-        return dist
-
-    #fastdtw library, want to reduce dependence on tones of libs so not using
-    def usefastdtw(x1, x2):
-        import fastdtw
-
-        distance, path = fastdtw(x1, x2)
-        return disance, path
-    """
-
     #kalman filter, commented heavily for personal reference
     #todo: factor in estimation of acceleration 
     def kalmanfilter(x, y):
@@ -262,12 +236,12 @@ class sample(template):
             S = np.dot(np.dot(H, P), H.T) + R
             K = np.dot(np.dot(P, H.T), np.linalg.pinv(S))
 
-            #update estimate
+            #update approximation
             v = xy[:,i].reshape(2, 1) 
             Z = v - np.dot(H, state)
             state = state + np.dot(K, temp)
 
-            #update error covariance
+            #update covariance of error
             I = np.eye(n)
             P = np.dot((I - np.dot(K, H)), P)
 
@@ -282,15 +256,15 @@ class sample(template):
     #most likely arrangement of people
     def pca():
         #take cov matrices & evals/evects
-        xcov, ycov = covarianceind()
+        covX, covY = covarianceind(self.allX, self.allY)
         ex, vx = np.eig(xcov)
         ey, vy = np.eig(ycov)
 
         #pair and sort the eigenvectors with respective eigenvalues
         expairs = [(np.abs(ex[i]), vx[:,i]) for i in range(len(ex))]
-        eypairs = [(np.abs(ey[i]), vy[:,i]) for i in range(len(ex))]
-        expairs.sort(key=lambda x: x[0], reverse=True)
-        eypairs.sort(key=lambda x: x[0], reverse=True)
+        eypairs = [(np.abs(ey[i]), vy[:,i]) for i in range(len(ey))]
+        expairs.sort(key = lambda x: x[0], reverse = True)
+        eypairs.sort(key = lambda x: x[0], reverse = True)
 
         #return greatest of each
         return expairs[0], eypairs[0]
