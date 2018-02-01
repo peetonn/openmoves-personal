@@ -110,7 +110,6 @@ class sample(template):
         
         return tempPairs
 
-    """below functions not called in run due to reorganizing"""
     def covariance(): #ignore entries of resulting matrix with indicies not both odd or even
         #todo: keep track of longest length for zero padding / otherwise account for different n in each timestep  
         #create a matrix such that each column is the x or y of a particular actor
@@ -138,9 +137,9 @@ class sample(template):
             truecov.append(currrow)
         return truecov
 
-    def covarianceind(x, y):
-        covX = np.cov(np.asarray(x).T)
-        covY = np.cov(np.asarray(y).T)
+    def covarianceind():
+        covX = np.cov(np.asarray(self.allX).T)
+        covY = np.cov(np.asarray(self.allY).T)
 
         return covX, covY
 
@@ -189,6 +188,15 @@ class sample(template):
     def classify(live, template, window):
         pass
 
+    """
+    #fastdtw library, want to reduce dependence on tones of libs so not using
+    def usefastdtw(x1, x2):
+        import fastdtw
+
+        distance, path = fastdtw(x1, x2)
+        return disance, path
+    """
+
     #kalman filter, commented heavily for personal reference
     #todo: factor in estimation of acceleration 
     def kalmanfilter(x, y):
@@ -236,12 +244,12 @@ class sample(template):
             S = np.dot(np.dot(H, P), H.T) + R
             K = np.dot(np.dot(P, H.T), np.linalg.pinv(S))
 
-            #update approximation
+            #update estimate
             v = xy[:,i].reshape(2, 1) 
             Z = v - np.dot(H, state)
             state = state + np.dot(K, temp)
 
-            #update covariance of error
+            #update error covariance
             I = np.eye(n)
             P = np.dot((I - np.dot(K, H)), P)
 
@@ -256,15 +264,15 @@ class sample(template):
     #most likely arrangement of people
     def pca():
         #take cov matrices & evals/evects
-        covX, covY = covarianceind(self.allX, self.allY)
+        xcov, ycov = covarianceind()
         ex, vx = np.eig(xcov)
         ey, vy = np.eig(ycov)
 
         #pair and sort the eigenvectors with respective eigenvalues
         expairs = [(np.abs(ex[i]), vx[:,i]) for i in range(len(ex))]
-        eypairs = [(np.abs(ey[i]), vy[:,i]) for i in range(len(ey))]
-        expairs.sort(key = lambda x: x[0], reverse = True)
-        eypairs.sort(key = lambda x: x[0], reverse = True)
+        eypairs = [(np.abs(ey[i]), vy[:,i]) for i in range(len(ex))]
+        expairs.sort(key=lambda x: x[0], reverse=True)
+        eypairs.sort(key=lambda x: x[0], reverse=True)
 
         #return greatest of each
         return expairs[0], eypairs[0]
