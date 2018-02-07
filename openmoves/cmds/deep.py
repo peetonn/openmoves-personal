@@ -1,7 +1,6 @@
-from template import .template
 import variables
 
-class deep(template):
+class deep:
     """Deep learning module"""
 
     def __init__(self, ops, *args, **kwargs):

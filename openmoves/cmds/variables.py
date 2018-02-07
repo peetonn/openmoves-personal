@@ -1,5 +1,9 @@
 # Shared variable repository
 
+#general
+PERIOD = .100 
+
+#instantaneous
 parentList = []
 pairs = []
 ids = []
@@ -11,4 +15,10 @@ yseconddersList = []
 allX = []
 allY = []
 
-PERIOD = .100 
+#unsupervised
+hotSpots = []
+numClusts = []
+centers = []
+clusters = []
+bounds = []
+spreads = []

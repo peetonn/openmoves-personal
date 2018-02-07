@@ -1,63 +1,55 @@
-from template import .template
+import variables
+import shapely.geometry as geometry
+from descartes import PolygonPatch
+import matplotlib.pyplot as plt
 
-class offline(template):
-    """Offline analyses of OPT data. Will probably be broken up into
-    several different CL commands, instead"""
+def plotting():
+    plt.ion()
+    plt.interactive(False)
+    fig = plt.figure(figsize=(5,5)) 
 
-    def __init__(self, ops, *args, **kwargs):
-        self.ops = ops
-        self.args = args
-        self.kwargs = kwargs
+def pltPaths():
+    #plot paths & points
+    for i in range(len(variables.allX[-1])):
+        plt.plot([item[i] for item in variables.allX], [item[i] for item in variables.allY], zorder=-1)
 
-    def run(self):
-        raise NotImplementedError("haven't moved stuff here, yet")
+    plt.scatter(variables.allX[-1], variables.allY[-1], zorder=3)
+    
+def pltClustering():
+    #plot clustering
+    centers = variables.centers[-1]
+    clusters = variables.clusters[-1]
+    for k in range(variables.numClusts[-1]):
+        center = centers[k]
+        combo = clusters[k]
 
-    def pltPaths():
-        plt.clf()
+        plt.plot(centers[0], centers[1], 'y' + '*', zorder=4)
+        for x in combo:
+            plt.plot([centers[0], x[0]], [centers[1], x[1]], 'r' + '--', zorder=2)
 
-        #plot paths & points
-        for i in range(len(currX)):
-            plt.plot([item[i] for item in self.allX], [item[i] for item in self.allY], zorder=-1)
+def pltShapes(fig):    
+    #Better method: calculate number of acute angles along convex hull 
+    centers = variables.centers[-1]
+    clusters = variables.clusters[-1]
+    for k in range(variables.numClusts[-1]):
+        center = centers[k]
+        combo = clusters[k]
 
-        plt.scatter(currX, currY, zorder=3)
+        #get shapes
+        pointColl = geometry.MultiPoint(combo)
+        convHull = pointColl.convex_hull
+        ax = fig.add_subplot(111)
+        if len(combo) > 2:
+            patch = PolygonPatch(convHull, fc='#999999', ec='#000000', fill=True, zorder=1)
+            ax.add_patch(patch)
         
-    def pltClustering():
-        #plot clustering
-        for k in range(nClusts):
-            classMems = labs == k
-            classMem = []
-            for t in classMems:
-                if isinstance(t, tuple):
-                    for x in t:
-                        classMem.append(x)
-                else:
-                    classMem.append(t)
-            classMems = np.asarray(classMem)
-            currXY = np.asarray(currXY)
-            center = centers[k]
-
-            #combine points
-            x, y = currXY[classMems, 0], currXY[classMems, 1]
-            combo = [] #push combo to save each cluster at each time step
-            for i in range(len(x)):
-                combo.append((x[i],y[i]))
-
-            #get shapes
-            pointColl = geometry.MultiPoint(combo)
-            convHull = pointColl.convex_hull
-            minx, miny, maxx, maxy = convHull.bounds
-            if len(x) > 2:
-                patch = PolygonPatch(convHull, fc='#999999', ec='#000000', fill=True, zorder=1)
-            ax = fig.add_subplot(111)
-            if len(x) > 2:
-                ax.add_patch(patch)
-
-    def pltShapes():    
-         """
-        Better method: calculate number of acute angles along convex hull 
-        """
-
-        plt.axis([-250,250,-250,250])
-        plt.pause(0.05)
-
-        time.sleep(self.PERIOD)
+            #label shapes
+            x, y = convHull.exterior.coords.xy
+            if len(x) == 4:
+                plt.text(centers[0] + 5, centers[1] + 5, r'triangle', fontdict={'size': 8})
+            if len(x) == 5:
+                plt.text(centers[0] + 5, centers[1] + 5, r'quad', fontdict={'size': 8})
+            if len(x) == 6:
+                plt.text(centers[0] + 5, centers[1] + 5, r'pentagon', fontdict={'size': 8})
+            if len(x) > 6:
+                plt.text(centers[0] + 5, centers[1] + 5, r'poly', fontdict={'size': 8})

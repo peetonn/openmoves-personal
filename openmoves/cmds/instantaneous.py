@@ -1,15 +1,7 @@
-#from template import .template
 import variables
+import numpy as np
 
-#class instantaneous():
 """Instantaneous features module functionality"""
-
-"""    def __init__(self, ops, *args, **kwargs):
-        self.ops = ops
-        self.args = args
-        self.kwargs = kwargs
-"""
-
 def pairwise(X, Y):
     tempPairs = []
     if(len(X) > len(Y)):

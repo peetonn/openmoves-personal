@@ -1,98 +1,135 @@
-from template import .template
 import variables
+import numpy as np
+from sklearn.cluster import AffinityPropagation
+from scipy import linalg
+from scipy.spatial import distance
+import shapely.geometry as geometry
+from descartes import PolygonPatch
 
-class unsupervised(template):
-    """Unsupervised analysis module"""
+"""Unsupervised analysis module"""
+def covariance(): 
+    #ignore entries of resulting matrix with indicies not both odd or even
+    #todo: keep track of longest length for zero padding / otherwise account for different n in each timestep  
+    #create a matrix such that each column is the x or y of a particular actor
+    allXY = []
+    for i in range(len(variables.allX)):
+        currentX = variables.allX[i]
+        currentY = variables.allY[i]
+        recentXY = []
+        for j in range(len(currentX)):
+            recentXY.append(currentX[j])
+            recentXY.append(currentY[j])
+        allXY.append(recentXY)
+    cov = np.cov(allXY)
 
-    def __init__(self, ops, *args, **kwargs):
-        self.ops = ops
-        self.args = args
-        self.kwargs = kwargs
+    #now filter out x-to-y and y-to-x covariances
+    m, n = cov.shape
+    truecov = []
+    for i in range(m): #rows
+        currrow = []
+        for j in range(n): #columns
+            if i%2==0 and j%2==0:
+                currrow.append(cov[i, j])
+            elif i%2!=0 and j%2!=0:
+                currrow.append(cov[i, j])
+        truecov.append(currrow)
+    return truecov
 
-    def run(self):
-        raise NotImplementedError("haven't moved stuff here, yet")
+def covarianceind():
+    covX = np.cov(np.asarray(variables.allX).T)
+    covY = np.cov(np.asarray(variables.allY).T)
 
-    def covariance(): 
-        #ignore entries of resulting matrix with indicies not both odd or even
-        #todo: keep track of longest length for zero padding / otherwise account for different n in each timestep  
-        #create a matrix such that each column is the x or y of a particular actor
-        allXY = []
-        for i in range(len(self.allX)):
-            currentX = self.allX[i]
-            currentY = self.allY[i]
-            recentXY = []
+    return covX, covY
+
+def pca():
+    #take cov matrices & evals/evects
+    xcov, ycov = covarianceind()
+    ex, vx = np.linalg.eig(xcov)
+    ey, vy = np.linalg.eig(ycov)
+
+    #pair and sort the eigenvectors with respective eigenvalues
+    expairs = [(np.abs(ex[i]), vx[:,i]) for i in range(len(ex))]
+    eypairs = [(np.abs(ey[i]), vy[:,i]) for i in range(len(ex))]
+    expairs.sort(key=lambda x: x[0], reverse=True)
+    eypairs.sort(key=lambda x: x[0], reverse=True)
+
+    #return greatest of each
+    return expairs[0], eypairs[0]
+
+#dtw-based classification
+#iterate through template paths, find corresponding live paths
+#use dtw distance as metric for closest corresponding template path
+def classify(live, template, window):
+    pass
+
+def hotClusts():
+    #hot locations analysis on recent time window (can adjust)
+    if(len(variables.allX) > 100):
+        recentXY = []
+        for i in range(1, 100):
+            currentX = variables.allX[len(variables.allX)-i]
+            currentY = variables.allY[len(variables.allX)-i]
             for j in range(len(currentX)):
-                recentXY.append(currentX[j])
-                recentXY.append(currentY[j])
-            allXY.append(recentXY)
-        cov = np.cov(allXY)
+                recentXY.append([currentX[j], currentY[j]])
 
-        #now filter out x-to-y and y-to-x covariances
-        m, n = cov.shape
-        truecov = []
-        for i in range(m): #rows
-            currrow = []
-            for j in range(n): #columns
-                if i%2==0 and j%2==0:
-                    currrow.append(cov[i, j])
-                elif i%2!=0 and j%2!=0:
-                    currrow.append(cov[i, j])
-            truecov.append(currrow)
-        return truecov
+    af = AffinityPropagation().fit(recentXY)
+    clusterCenters = af.cluster_centers_indices_
+    labs = af.labels_
+    nClusts = len(clusterCenters)
+    hotSpots = []
+    for i in range(nClusts):
+        hotSpots.append(recentXY[clusterCenters[i]])
 
-    def covarianceind():
-        covX = np.cov(np.asarray(self.allX).T)
-        covY = np.cov(np.asarray(self.allY).T)
+def clusts(currXY):
+    #get clusters
+    af = AffinityPropagation().fit(currXY)
+    clusterCenters = af.cluster_centers_indices_
+    labs = af.labels_
+    nClusts = len(clusterCenters)
+    variables.numClusts.append(nClusts)
+    
+    #cluster distances
+    centers = []
+    for i in range(nClusts):
+        centers.append(currXY[clusterCenters[i]])
+    variables.centers.append(centers)
 
-        return covX, covY
+    currClusters = []
+    currBounds = []
+    currSpreads = []
+    for k in range(nClusts):
+        classMems = labs == k
+        classMem = []
+        for t in classMems:
+            if isinstance(t, tuple):
+                for x in t:
+                    classMem.append(x)
+            else:
+                classMem.append(t)
+        classMems = np.asarray(classMem)
+        currXY = np.asarray(currXY)
+        center = centers[k]
 
-    def pca():
-        #take cov matrices & evals/evects
-        xcov, ycov = covarianceind()
-        ex, vx = np.eig(xcov)
-        ey, vy = np.eig(ycov)
+        #combine points
+        x, y = currXY[classMems, 0], currXY[classMems, 1]
+        combo = [] #push combo to save each cluster at each time step
+        for i in range(len(x)):
+            combo.append((x[i],y[i]))
+        currClusters.append(combo)
 
-        #pair and sort the eigenvectors with respective eigenvalues
-        expairs = [(np.abs(ex[i]), vx[:,i]) for i in range(len(ex))]
-        eypairs = [(np.abs(ey[i]), vy[:,i]) for i in range(len(ex))]
-        expairs.sort(key=lambda x: x[0], reverse=True)
-        eypairs.sort(key=lambda x: x[0], reverse=True)
+        #bounds
+        pointColl = geometry.MultiPoint(combo)
+        convHull = pointColl.convex_hull
+        minx, miny, maxx, maxy = convHull.bounds
+        currBounds.append([minx, miny, maxx, maxy])
 
-        #return greatest of each
-        return expairs[0], eypairs[0]
+        #spreads
+        dists = []
+        for j in range(len(combo)):
+            dists.append(distance.euclidean(combo[j], center))
+        currSpreads.append(sum(dists) / float(len(dists)))
 
-    #dtw-based classification
-    #iterate through template paths, find corresponding live paths
-    #use dtw distance as metric for closest corresponding template path
-    def classify(live, template, window):
-        pass
+    variables.clusters.append(currClusters)
+    variables.bounds.append(currBounds)
+    variables.spreads.append(currSpreads)
 
-    def hotClusts():
-        #hot locations analysis on recent time window (can adjust)
-        if(len(self.allX) > 100):
-            recentXY = []
-            for i in range(1, 100):
-                currentX = self.allX[len(self.allX)-i]
-                currentY = self.allY[len(self.allX)-i]
-                for j in range(len(currentX)):
-                    recentXY.append([currentX[j], currentY[j]])
-
-        af = AffinityPropagation().fit(recentXY)
-        clusterCenters = af.cluster_centers_indices_
-        labs = af.labels_
-        nClusts = len(clusterCenters)
-        hotSpots = []
-        for i in range(nClusts):
-            hotSpots.append(recentXY[clusterCenters[i]])
-
-    def clusts():
-        #get clusters
-        af = AffinityPropagation().fit(currXY)
-        clusterCenters = af.cluster_centers_indices_
-        labs = af.labels_
-        nClusts = len(clusterCenters) #push to save at each time step
-        
-        #cluster distances
-        centers = []
-        for i in range(nClusts):
-            centers.append(currXY[clusterCenters[i]])
