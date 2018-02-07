@@ -2,16 +2,19 @@
 
 #general
 PERIOD = .100 
+epoch = 0
 
 #instantaneous
-parentList = []
-pairs = []
 ids = []
+parentList = []
+
+pairs = []
 xdersList = []
 ydersList = []
 xseconddersList = []
 yseconddersList = []
 
+allXY = []
 allX = []
 allY = []
 

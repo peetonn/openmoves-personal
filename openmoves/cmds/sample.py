@@ -246,7 +246,7 @@ class sample(template):
 
             #update estimate
             v = xy[:,i].reshape(2, 1) 
-            Z = v - np.dot(H, state)
+             = v - np.dot(H, state)
             state = state + np.dot(K, temp)
 
             #update error covariance
