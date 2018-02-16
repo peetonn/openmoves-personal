@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: openmoves
-Version: 1
+Version: 1.0
 Summary: Library for analysing OPT data
 Home-page: UNKNOWN
 Author: Sam Amin
@@ -14,4 +14,5 @@ Description: openmoves pre-pre-alpha
         remap.ucla.edu
         
         
+Keywords: cli
 Platform: UNKNOWN

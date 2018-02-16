@@ -1,6 +1,0 @@
-shorttime:
-	windowsize: 10
-
-unsupervised:
-	shortclusterwindowsize: 3
-	memorywindowsize: 10

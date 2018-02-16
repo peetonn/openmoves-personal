@@ -1,4 +1,4 @@
-import socket, time, json, time, random
+import socket, time, json, time, random, Math
 from sklearn.cluster import AffinityPropagation
 from scipy import linalg
 import shapely.geometry as geometry
@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import numpy.random as rnd
 
-from template import .template
+from .base import Base
 
 """
 Next steps:
@@ -27,7 +27,7 @@ How it works:
     -> given the extrinsic calibration of the network, can intersect the cones and get the area
 """
 
-class sample(template):
+class Sample(Base):
     def __init__(self, ops, *args, **kwargs):
         self.ops = ops
         self.args = args
@@ -53,15 +53,15 @@ class sample(template):
         self.allX = []
         self.allY = []
 
-    def track( id, x, y, height, age, confidence ) :
+    def track(self, id, x, y, height, age, confidence) :
         return {"id":id, "x":x, "y":y, "height":height, "age": age, "confidence":confidence}
 
-    def packet( tracks ) : 
-        self.self._SEQ+=1
+    def packet(self, tracks) : 
+        self._SEQ+=1
         now = float(time.time())
         sec = int(now)
         nsec = int((now-sec) * 1e9)
-        header = { "seq":self.self._SEQ, "stamp": {"sec":sec, "nsec":nsec}, "frame_id":"world" }
+        header = { "seq":self._SEQ, "stamp": {"sec":sec, "nsec":nsec}, "frame_id":"world" }
         return { "header":header, "tracks":tracks } 
 
     '''
@@ -86,7 +86,7 @@ class sample(template):
         return xes 
     '''
 
-    def walk(W):
+    def walk(self, W):
         #todo: adjust this to generate paths which are differentiable
         #where acceleration is what is random & velocity then position are calculated from it
         #a_n is random, v_(n+1)=v_n+a_n dt and x_(n+1)=x_n+v_ndt+1/2 a_n dt^2
@@ -95,7 +95,7 @@ class sample(template):
             w[1] += self.MAXSTEP_Y * 2*(random.random() - 0.5)
             w[2] = self.Z_NOMINAL + self.WOBBLE_Z*2*(random.random()-0.5) 
     
-    def pairwise(X, Y):
+    def pairwise(self, X, Y):
         tempPairs = []
         if(len(X) > len(Y)):
             rng = len(Y)
@@ -110,7 +110,7 @@ class sample(template):
         
         return tempPairs
 
-    def covariance(): #ignore entries of resulting matrix with indicies not both odd or even
+    def covariance(self): #ignore entries of resulting matrix with indicies not both odd or even
         #todo: keep track of longest length for zero padding / otherwise account for different n in each timestep  
         #create a matrix such that each column is the x or y of a particular actor
         allXY = []
@@ -137,7 +137,7 @@ class sample(template):
             truecov.append(currrow)
         return truecov
 
-    def covarianceind():
+    def covarianceind(self):
         covX = np.cov(np.asarray(self.allX).T)
         covY = np.cov(np.asarray(self.allY).T)
 
@@ -152,7 +152,7 @@ class sample(template):
     for example: can be customised per performance to search for a particular movement
     sequence among all actors
             -add support for z coordinate"""
-    def dtw(p1, p2, window):
+    def dtw(self, p1, p2, window):
         dtwdict = {}
 
         #set window size... todo: generation of window size via cross-validation
@@ -180,12 +180,12 @@ class sample(template):
             indices.append((i-1, j-1))
             i, j = dtwdict[(i, j)][1], dtwdict[(i, j)][2]
 
-        return sqrt(dtwdict[len(p1)-1, len(p2)-1]), indices.reverse()
+        return Math.sqrt(dtwdict[len(p1)-1, len(p2)-1]), indices.reverse()
 
     #dtw-based classification, as per above todo
     #iterate through template paths, find corresponding live paths
     #use dtw distance as metric for closest corresponding template path
-    def classify(live, template, window):
+    def classify(self, live, template, window):
         pass
 
     """
@@ -199,7 +199,7 @@ class sample(template):
 
     #kalman filter, commented heavily for personal reference
     #todo: factor in estimation of acceleration 
-    def kalmanfilter(x, y):
+    def kalmanfilter(self, x, y):
         velocx = []
         velocy = []
         accelx = []
@@ -246,7 +246,7 @@ class sample(template):
 
             #update estimate
             v = xy[:,i].reshape(2, 1) 
-             = v - np.dot(H, state)
+            temp = v - np.dot(H, state)
             state = state + np.dot(K, temp)
 
             #update error covariance
@@ -262,11 +262,11 @@ class sample(template):
 
     #Take covariance-method PCA, get sort of 
     #most likely arrangement of people
-    def pca():
+    def pca(self):
         #take cov matrices & evals/evects
-        xcov, ycov = covarianceind()
-        ex, vx = np.eig(xcov)
-        ey, vy = np.eig(ycov)
+        xcov, ycov = self.covarianceind()
+        ex, vx = np.linalg.eig(xcov)
+        ey, vy = np.linalg.eig(ycov)
 
         #pair and sort the eigenvectors with respective eigenvalues
         expairs = [(np.abs(ex[i]), vx[:,i]) for i in range(len(ex))]
@@ -297,17 +297,17 @@ class sample(template):
 
         try:
             while True:
-                walk(walkers)
-                MESSAGE = json.dumps( packet( [ track(42, walkers[0][0], walkers[0][1], walkers[0][2], self._SEQ+100+random.random(), random.random()),
-                                                track(43, walkers[1][0], walkers[1][1], walkers[1][2], self._SEQ+100+random.random(), random.random()),
-                                                track(44, walkers[2][0], walkers[2][1], walkers[2][2], self._SEQ+100+random.random(), random.random()),
-                                                track(45, walkers[3][0], walkers[3][1], walkers[3][2], self._SEQ+100+random.random(), random.random()),
-                                                track(46, walkers[4][0], walkers[4][1], walkers[4][2], self._SEQ+100+random.random(), random.random()),
-                                                track(47, walkers[5][0], walkers[5][1], walkers[5][2], self._SEQ+100+random.random(), random.random()),
-                                                track(48, walkers[6][0], walkers[6][1], walkers[6][2], self._SEQ+100+random.random(), random.random()),
-                                                track(49, walkers[7][0], walkers[7][1], walkers[7][2], self._SEQ+100+random.random(), random.random()),
-                                                track(50, walkers[8][0], walkers[8][1], walkers[8][2], self._SEQ+100+random.random(), random.random()),
-                                                track(51, walkers[9][0], walkers[9][1], walkers[9][2], self._SEQ+100+random.random(), random.random())] )  )
+                self.walk(walkers)
+                MESSAGE = json.dumps( self.packet( [ self.track(42, walkers[0][0], walkers[0][1], walkers[0][2], self._SEQ+100+random.random(), random.random()),
+                                                self.track(43, walkers[1][0], walkers[1][1], walkers[1][2], self._SEQ+100+random.random(), random.random()),
+                                                self.track(44, walkers[2][0], walkers[2][1], walkers[2][2], self._SEQ+100+random.random(), random.random()),
+                                                self.track(45, walkers[3][0], walkers[3][1], walkers[3][2], self._SEQ+100+random.random(), random.random()),
+                                                self.track(46, walkers[4][0], walkers[4][1], walkers[4][2], self._SEQ+100+random.random(), random.random()),
+                                                self.track(47, walkers[5][0], walkers[5][1], walkers[5][2], self._SEQ+100+random.random(), random.random()),
+                                                self.track(48, walkers[6][0], walkers[6][1], walkers[6][2], self._SEQ+100+random.random(), random.random()),
+                                                self.track(49, walkers[7][0], walkers[7][1], walkers[7][2], self._SEQ+100+random.random(), random.random()),
+                                                self.track(50, walkers[8][0], walkers[8][1], walkers[8][2], self._SEQ+100+random.random(), random.random()),
+                                                self.track(51, walkers[9][0], walkers[9][1], walkers[9][2], self._SEQ+100+random.random(), random.random())] )  )
             
                 payload = bytes(MESSAGE.encode('utf-8')) + bytes(bytearray(100))
                 sock.sendto(payload, (self.UDP_IP, self.UDP_PORT))
@@ -365,11 +365,11 @@ class sample(template):
                     currXY.append([currX[x], currY[x]])
 
                 #pairwise distances
-                tempPairs = pairwise(currX, currY)
+                tempPairs = self.pairwise(currX, currY)
 
                 #take upper triangular only, no redundant distances
                 #tempPairsTriu = list(np.asarray(tempPairs)[np.triu_indices(len(currX),1)])
-                pairs.append(tempPairs)
+                self.pairs.append(tempPairs)
 
                 self.allX.append(currX)
                 self.allY.append(currY)

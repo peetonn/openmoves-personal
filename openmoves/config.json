@@ -1,0 +1,9 @@
+{
+	"shorttime":10,
+	"windowsize":10,
+
+	"unsupervised":{
+		"shortclusterwindowsize": 30,
+		"memorywindowsize": 100
+	}
+}

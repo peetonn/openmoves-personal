@@ -1,6 +1,6 @@
 import variables
 
-class deep:
+class Deep:
     """Deep learning module"""
 
     def __init__(self, ops, *args, **kwargs):
