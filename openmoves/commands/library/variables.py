@@ -26,8 +26,10 @@ allX = []
 allY = []
 
 #short time
+dtwdistances = []
 shorttimespan = None
 shortwindow = None
+dtwrefresh = None
 
 #unsupervised
 shortclusterwindow = None

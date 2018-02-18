@@ -11,6 +11,7 @@ import library.instantaneous as instantaneous
 import library.publishing as publishing
 import library.unsupervised as unsupervised
 import library.visualization as visualize
+import library.shorttime as shorttime
 
 from .base import Base
 
@@ -60,17 +61,19 @@ class Readin(Base):
                 for singleID in allids:
                     if singleID not in variables.ids:
                         variables.ids.append(singleID)
-                        variables.parentList.append([[float('inf'), float('inf'), float('inf')]] * variables.epoch)
-                        variables.xdersList.append([[float('inf'), float('inf'), float('inf')]] * variables.epoch)
-                        variables.ydersList.append([[float('inf'), float('inf'), float('inf')]] * variables.epoch)
-                        variables.xseconddersList.append([[float('inf'), float('inf'), float('inf')]] * variables.epoch)
-                        variables.yseconddersList.append([[float('inf'), float('inf'), float('inf')]] * variables.epoch)
+                        variables.parentList.append([[float('inf'), float('inf')]] * variables.epoch)
+                        variables.xdersList.append([[float('inf'), float('inf')]] * variables.epoch)
+                        variables.ydersList.append([[float('inf'), float('inf')]] * variables.epoch)
+                        variables.xseconddersList.append([[float('inf'), float('inf')]] * variables.epoch)
+                        variables.yseconddersList.append([[float('inf'), float('inf')]] * variables.epoch)
+                        variables.dtwdistances.append([])
                 
                     #append each track to appropriate list
                     childList = []
                     for singletrack in trackData:
                         if(singletrack[0] == singleID):
                             del singletrack[0]
+                            del singletrack[2]
                             childList = singletrack
                     idx = variables.ids.index(singleID)
                     variables.parentList[idx].append(childList)
@@ -80,11 +83,11 @@ class Readin(Base):
                 for singleID in variables.ids:
                     if singleID not in allids:
                         idx = variables.ids.index(singleID)
-                        variables.parentList[idx].append([float('inf'), float('inf'), float('inf')])
-                        variables.xdersList[idx].append([float('inf'), float('inf'), float('inf')])
-                        variables.ydersList[idx].append([float('inf'), float('inf'), float('inf')])
-                        variables.xseconddersList[idx].append([float('inf'), float('inf'), float('inf')])
-                        variables.yseconddersList[idx].append([float('inf'), float('inf'), float('inf')])
+                        variables.parentList[idx].append([float('inf'), float('inf')])
+                        variables.xdersList[idx].append([float('inf'), float('inf')])
+                        variables.ydersList[idx].append([float('inf'), float('inf')])
+                        variables.xseconddersList[idx].append([float('inf'), float('inf')])
+                        variables.yseconddersList[idx].append([float('inf'), float('inf')])
                 
                 currX = [point[0] for point in trackData]
                 currY = [point[1] for point in trackData]
@@ -92,8 +95,6 @@ class Readin(Base):
                 currXY = []
                 for x in range(len(trackData)):
                     currXY.append([currX[x], currY[x]])
-
-                print(currXY)
 
                 unsupervised.clusts(currXY)
                 unsupervised.hotClusts()
@@ -105,12 +106,26 @@ class Readin(Base):
                 #tempPairsTriu = list(np.asarray(tempPairs)[np.triu_indices(len(currX),1)])
                 variables.pairs.append(tempPairs)
 
+                if variables.epoch % 50 == 0:
+                    for singleID in allids:
+                        idx = variables.ids.index(singleID)
+                        path = variables.parentList[idx]
+                        variables.dtwdistances[idx] = []
+                        for singleID in allids:
+                            idx2 = variables.ids.index(singleID)
+                            otherpath = variables.parentList[idx2]
+                            if path == otherpath:
+                                continue
+                            else:
+                                distance = shorttime.dtw(path, otherpath, variables.shortwindow)
+                                variables.dtwdistances[idx].append(distance)
+
                 variables.allXY.append(currXY)
                 variables.allX.append(currX)
                 variables.allY.append(currY)
                 variables.epoch += 1
 
-                if variables.epoch % 100 == 0:
+                if variables.epoch % variables.pcarefresh == 0:
                     variables.expair = []
                     variables.eypair = []
                     expair, eypair = unsupervised.pca()
@@ -132,7 +147,7 @@ class Readin(Base):
                 if variables.visualize == 1:
                     visualize.pltPaths()
                     visualize.pltClustering()
-                    #visualize.pltShapes(fig)
+                    visualize.pltShapes(fig)
                     plt.pause(0.000000000001)
 
         except KeyboardInterrupt:

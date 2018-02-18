@@ -1,8 +1,10 @@
 {
-	"visualize":1,
+	"visualize":0,
+	"trackheight":0,
 	
 	"shorttime":10,
-	"windowsize":10,
+	"windowsize":100,
+	"dtwrefresh":100,
 
 	"unsupervised":{
 		"shortclusterwindowsize": 30,

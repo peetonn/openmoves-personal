@@ -75,7 +75,7 @@ def hotClusts():
         af = AffinityPropagation().fit(recentXY)
         clusterCenters = af.cluster_centers_indices_
         
-        if type(clusterCenters) is None:
+        if clusterCenters is None:
             nClusts = 0
         else:
             nClusts = len(clusterCenters)
@@ -89,7 +89,7 @@ def clusts(currXY):
     af = AffinityPropagation().fit(currXY)
     clusterCenters = af.cluster_centers_indices_
     labs = af.labels_
-    if type(clusterCenters) is None:
+    if clusterCenters is None:
         nClusts = 0
     else:
         nClusts = len(clusterCenters)

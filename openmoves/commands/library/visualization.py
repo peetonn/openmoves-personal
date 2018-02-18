@@ -23,9 +23,9 @@ def pltClustering():
         center = centers[k]
         combo = clusters[k]
 
-        plt.plot(centers[0], centers[1], 'y' + '*', zorder=4)
+        plt.plot(center[0], center[1], 'y' + '*', zorder=4)
         for x in combo:
-            plt.plot([centers[0], x[0]], [centers[1], x[1]], 'r' + '--', zorder=2)
+            plt.plot([center[0], x[0]], [center[1], x[1]], 'r' + '--', zorder=2)
 
 def pltShapes(fig):    
     #Better method: calculate number of acute angles along convex hull 
@@ -44,6 +44,7 @@ def pltShapes(fig):
             ax.add_patch(patch)
         
             #label shapes
+            #todo: calculate number of acute angles along convex hull instead
             x, y = convHull.exterior.coords.xy
             if len(x) == 4:
                 plt.text(centers[0] + 5, centers[1] + 5, r'triangle', fontdict={'size': 8})

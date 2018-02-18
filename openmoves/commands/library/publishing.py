@@ -11,6 +11,7 @@ def parse():
     variables.shortclusterwindow = data["unsupervised"]["shortclusterwindowsize"]
     variables.hotspotwindow = data["unsupervised"]["hotspotwindowsize"]
     variables.pcarefresh = data["unsupervised"]["pcarefresh"]
+    variables.dtwrefreh = data["dtwrefresh"]
 
 def packet():
     """
@@ -47,4 +48,5 @@ def secondPacket():
     sec = int(now)
     nsec = int((now-sec) * 1e9)
     header = {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}
-    return {"seq":variables.SEQ, "hotspots":variables.hotSpots, "pca_x":variables.expair, "pca_y":variables.eypair}
+    return {"seq":variables.SEQ, "pca_x":variables.expair, "pca_y":variables.eypair, "dtwdistances":variables.dtwdistances, "idorder": variables.ids, "hotspots":variables.hotSpots}
+    #"dtwdistances":variables.dtwdistances, "idorder": variables.ids, "hotspots":variables.hotSpots, 

@@ -15,31 +15,35 @@ def dtw(p1, p2, window):
     dtwdict = {}
 
     #set window size... todo: generation of window size via cross-validation
-    if (window > abs(len(p1) - len(p2))):
+    if (window < abs(len(p1) - len(p2))):
         window = abs(len(p1) - len(p2))
 
     #generate empty dictionary
     for i in range(-1, len(p1)):
         for j in range(-1, len(p2)):
-            dtwdict[(i, j)] = (0, 0, 0)
-    dtwdict[(-1, -1)] = (0, 0, 0)
+            dtwdict[(i, j)] = float("inf")#(0, 0, 0)
+    dtwdict[(-1, -1)] = 0#(0, 0, 0)
 
     #do the dtw
     for i in range(len(p1)):
         for j in range(max(0, i - window), min(len(p2), i + window)):
             dist = ((p1[i][0] - p2[j][0]) ** 2) + ((p1[i][1] - p2[j][1]) ** 2)
-            dtwdict[(i, j)] = min((dtwdict[(i-1, j)], i-1, j), (dtwdict[(i, j-1)], i, j-1), (dtwdict[(i-1, j-1)], i-1, j-1), 
-                key = lambda x: x[0]) #get the min distance with indices appended
-            dtwdict[(i, j)][0] += dist
+            dtwdict[(i, j)] = dist + min(dtwdict[(i - 1, j)], dtwdict[(i, j-1)], dtwdict[(i-1, j-1)])#min((dtwdict[(i-1, j)], i-1, j), (dtwdict[(i, j-1)], i, j-1), (dtwdict[(i-1, j-1)], i-1, j-1), 
+                #key = lambda x: x[0]) #get the min distance with indices appended
+            #dtwdict[(i, j)][0] += dist
 
     #get list indices for warp path
-    indices = []
-    i, j = len(p1), len(p2)
+    """indices = []
+    i, j = len(p1)-1, len(p2)-1
     while not (i == j == 0):
+        print(i)
+        print(j)
         indices.append((i-1, j-1))
-        i, j = dtwdict[(i, j)][1], dtwdict[(i, j)][2]
-
-    return math.sqrt(dtwdict[len(p1)-1, len(p2)-1]), indices.reverse()
+        print(dtwdict[(i, j)])
+        print(dtwdict[(i, j)][2])
+        i, j = dtwdict[(i, j)][1], dtwdict[(i, j)][2]"""
+    
+    return math.sqrt(dtwdict[len(p1)-1, len(p2)-1])#, indices.reverse()
 
 
 #kalman filter, commented heavily for personal reference
