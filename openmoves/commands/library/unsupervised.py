@@ -64,28 +64,35 @@ def classify(live, template, window):
 
 def hotClusts():
     #hot locations analysis on recent time window (can adjust)
-    if(len(variables.allX) > 100):
+    if(len(variables.allX) > variables.hotspotwindow):
         recentXY = []
-        for i in range(1, 100):
+        for i in range(1, variables.hotspotwindow):
             currentX = variables.allX[len(variables.allX)-i]
             currentY = variables.allY[len(variables.allX)-i]
             for j in range(len(currentX)):
                 recentXY.append([currentX[j], currentY[j]])
 
-    af = AffinityPropagation().fit(recentXY)
-    clusterCenters = af.cluster_centers_indices_
-    labs = af.labels_
-    nClusts = len(clusterCenters)
-    hotSpots = []
-    for i in range(nClusts):
-        hotSpots.append(recentXY[clusterCenters[i]])
+        af = AffinityPropagation().fit(recentXY)
+        clusterCenters = af.cluster_centers_indices_
+        
+        if type(clusterCenters) is None:
+            nClusts = 0
+        else:
+            nClusts = len(clusterCenters)
+
+        variables.hotSpots = []
+        for i in range(nClusts):
+            variables.hotSpots.append(recentXY[clusterCenters[i]])
 
 def clusts(currXY):
     #get clusters
     af = AffinityPropagation().fit(currXY)
     clusterCenters = af.cluster_centers_indices_
     labs = af.labels_
-    nClusts = len(clusterCenters)
+    if type(clusterCenters) is None:
+        nClusts = 0
+    else:
+        nClusts = len(clusterCenters)
     variables.numClusts.append(nClusts)
     
     #cluster distances

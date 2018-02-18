@@ -8,11 +8,13 @@ Usage:
   openmoves --version
 
 Options:
-  -h --help                         Show this screen.
-  --version                         Show version.
+  readin                            Run OpenMoves with options as configured in config.json
+  sample                            Run OpenMoves with sample simulator
+  -h --help                         Show this screen
+  --version                         Show version
 
 Examples:
-  openmoves run
+  openmoves readin
   openmoves sample
   
 Help:

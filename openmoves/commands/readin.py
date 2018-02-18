@@ -1,3 +1,5 @@
+from __future__ import print_function #can be ignored removed, used to supress an error in my particular editor
+
 import socket, time, json, time, random
 import shapely.geometry as geometry
 from descartes import PolygonPatch
@@ -7,6 +9,8 @@ import numpy as np
 import library.variables as variables
 import library.instantaneous as instantaneous
 import library.publishing as publishing
+import library.unsupervised as unsupervised
+import library.visualization as visualize
 
 from .base import Base
 
@@ -17,7 +21,7 @@ class Readin(Base):
         self.options = options
         self.args = args
         self.kwargs = kwargs
-        variables.parse()
+        publishing.parse()
 
     def run(self):
         plt.ion()
@@ -28,21 +32,24 @@ class Readin(Base):
         s_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         s_in.bind(("", variables.UDP_PORT_IN))
-        #print("waiting on port:", self.port)
+        print("waiting on port:", variables.UDP_PORT_IN)
         
         try:
             while True:
-                plt.clf()
+                if variables.visualize == 1:
+                    plt.clf()
                 data, addr = s_in.recvfrom(8192)
                 data = data.rstrip("\0")  
                 payload = json.dumps(json.loads(data), sort_keys=True, indent=4, separators=(',', ': ') ) 
 
                 #parse as generated
                 msg = str(payload)
-                end = msg.find("]}") + 2
-                start = msg.find('{"header')
+                #end = msg.find("]}") + 2
+                #start = msg.find('{"header')
 
-                trackingData = json.loads(msg[start:end])
+                trackingData = json.loads(msg)#[start:end])
+                variables.SEQ = trackingData['header']['seq']
+
                 tracks = trackingData['tracks']
                 trackData = []
                 for singletrack in tracks:
@@ -86,6 +93,11 @@ class Readin(Base):
                 for x in range(len(trackData)):
                     currXY.append([currX[x], currY[x]])
 
+                print(currXY)
+
+                unsupervised.clusts(currXY)
+                unsupervised.hotClusts()
+
                 #pairwise distances
                 tempPairs = instantaneous.pairwise(currX, currY)
 
@@ -98,12 +110,30 @@ class Readin(Base):
                 variables.allY.append(currY)
                 variables.epoch += 1
 
+                if variables.epoch % 100 == 0:
+                    variables.expair = []
+                    variables.eypair = []
+                    expair, eypair = unsupervised.pca()
+                    expair = list(expair)
+                    eypair = list(eypair)
+                    expair[1] = expair[1].tolist()
+                    eypair[1] = eypair[1].tolist()
+                    variables.expair.append(expair)
+                    variables.eypair.append(eypair)
+
                 MESSAGE = json.dumps(publishing.packet())
                 payload = bytes(MESSAGE.encode('utf-8')) + bytes(bytearray(100))
                 s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
 
-                plt.pause(0.05)
-                time.sleep(variables.PERIOD)
+                MESSAGE = json.dumps(publishing.secondPacket())
+                payload = bytes(MESSAGE.encode('utf-8')) + bytes(bytearray(100))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+
+                if variables.visualize == 1:
+                    visualize.pltPaths()
+                    visualize.pltClustering()
+                    #visualize.pltShapes(fig)
+                    plt.pause(0.000000000001)
 
         except KeyboardInterrupt:
             pass 

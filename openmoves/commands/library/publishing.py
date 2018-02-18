@@ -1,4 +1,16 @@
-import variables, time, json
+import variables, time, json, os
+
+def parse():
+    """function to parse the config file"""
+    fn = os.path.join(os.path.dirname(__file__), '..', '..', 'config.json')
+    with open(fn) as data_file:
+        data = json.load(data_file)
+    variables.visualize = data["visualize"]
+    variables.shorttimespan = data["shorttime"]
+    variables.shortwindow = data["windowsize"]
+    variables.shortclusterwindow = data["unsupervised"]["shortclusterwindowsize"]
+    variables.hotspotwindow = data["unsupervised"]["hotspotwindowsize"]
+    variables.pcarefresh = data["unsupervised"]["pcarefresh"]
 
 def packet():
     """
@@ -18,14 +30,21 @@ def packet():
 
     firstdirs = []
     seconddirs = []
-    for i in len(variables.ids):
-        if len(variables.xdersList[i]) == variables.epoch:
-            firstdirs.append({"id":variables.ids[i], "x":variables.xdersList[i], "y":variables.ydersList[i]})
-            seconddirs.append({"id":variables.ids[i], "x":variables.xseconddersList[i], "y":variables.yseconddersList[i]})
+    for i in range(len(variables.ids)):
+        if len(variables.xdersList[i]) == variables.epoch-2 and variables.epoch > 2:
+            firstdirs.append({"id":variables.ids[i], "x":variables.xdersList[i][-1], "y":variables.ydersList[i][-1]})
+        if len(variables.xdersList[i]) == variables.epoch-2 and variables.epoch > 3:
+            seconddirs.append({"id":variables.ids[i], "x":variables.xseconddersList[i][-1], "y":variables.yseconddersList[i][-1]})
     pairs = variables.pairs[-1]
     centers = variables.centers[-1]
     clusters = variables.clusters[-1]
-    return {"header":header, "firstdirs":firstdirs, "seconddirs":seconddirs, "pairwise":pairs, \
-        "clusters":clusters, "clustercenters":centers}
+    spreads = variables.spreads[-1]
+    return {"header":header, "firstdirs":firstdirs, "seconddirs":seconddirs, "pairwise":pairs,  
+        "clusters":clusters, "clustercenters":centers, "spreads":spreads} 
 
-
+def secondPacket():
+    now = float(time.time())
+    sec = int(now)
+    nsec = int((now-sec) * 1e9)
+    header = {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}
+    return {"seq":variables.SEQ, "hotspots":variables.hotSpots, "pca_x":variables.expair, "pca_y":variables.eypair}

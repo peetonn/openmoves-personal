@@ -1,5 +1,3 @@
-import json, os
-
 # Shared variable repository
 # Config file read-in vars initialized with None
 
@@ -10,6 +8,7 @@ UDP_PORT_IN = 21234
 UDP_PORT_OUT = 21235
 SEQ = 0
 epoch = 0
+visualize = 0 # 0 or 1
 
 #instantaneous
 ids = []
@@ -32,7 +31,10 @@ shortwindow = None
 
 #unsupervised
 shortclusterwindow = None
-memorywindow = None
+hotspotwindow = None
+pcarefresh = None
+expair = []
+eypair = []
 
 hotSpots = []
 numClusts = []
@@ -40,13 +42,3 @@ centers = []
 clusters = []
 bounds = []
 spreads = []
-
-def parse():
-    """function to parse the config file"""
-    fn = os.path.join(os.path.dirname(__file__), '..', '..', 'config.json')
-    with open(fn) as data_file:
-        data = json.load(data_file)
-    shorttimespan = data["shorttime"]
-    shortwindow = data["windowsize"]
-    shortclusterwindow = data["unsupervised"]["shortclusterwindowsize"]
-    memorywindow = data["unsupervised"]["memorywindowsize"]
