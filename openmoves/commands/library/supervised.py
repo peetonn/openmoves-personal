@@ -1,7 +1,7 @@
 import variables
 
-class Deep:
-    """Deep learning module"""
+class Supervised:
+    """Unsupervised learning module"""
 
     def __init__(self, ops, *args, **kwargs):
         self.ops = ops

@@ -36,6 +36,15 @@ def covariance():
     return truecov
 
 def covarianceind():
+    print(variables.allX)
+    print('------')
+    print(variables.allY)
+    print('------')
+    print(np.asarray(variables.allX).T)
+    print('------')
+    print(np.asarray(variables.allY).T)
+    print('------')
+    print('------')
     covX = np.cov(np.asarray(variables.allX).T)
     covY = np.cov(np.asarray(variables.allY).T)
 

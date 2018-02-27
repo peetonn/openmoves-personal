@@ -6,11 +6,12 @@ Home-page: UNKNOWN
 Author: Sam Amin
 Author-email: samamin@ucla.edu
 License: UNKNOWN
-Description-Content-Type: UNKNOWN
-Description: openmoves pre-pre-alpha
+Description: openmoves beta
         
         To be used atop OpenPTrack. Receives data from OpenPTrack's UDP stream; ensure that your computer is connected to the same network as the OPT system is before use 
-        
+        To install: 
+            navigate to folder
+            sudo pip install -e .
         remap.ucla.edu
         
         

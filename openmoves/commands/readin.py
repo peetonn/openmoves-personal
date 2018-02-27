@@ -34,6 +34,8 @@ class Readin(Base):
 
         s_in.bind(("", variables.UDP_PORT_IN))
         print("waiting on port:", variables.UDP_PORT_IN)
+
+        aliveids = 0
         
         try:
             while True:
@@ -50,8 +52,15 @@ class Readin(Base):
 
                 trackingData = json.loads(msg)#[start:end])
                 variables.SEQ = trackingData['header']['seq']
+                if trackingData['header']['frame_id'] == 'heartbeat':
+                    aliveids = len(trackingData['alive_IDs'])
+                    print(aliveids)
+                    continue
 
-                tracks = trackingData['tracks']
+                tracks = trackingData['people_tracks']
+                if tracks == []:
+                    continue
+
                 trackData = []
                 for singletrack in tracks:
                     trackData.append([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
@@ -62,10 +71,10 @@ class Readin(Base):
                     if singleID not in variables.ids:
                         variables.ids.append(singleID)
                         variables.parentList.append([[float('inf'), float('inf')]] * variables.epoch)
-                        variables.xdersList.append([[float('inf'), float('inf')]] * variables.epoch)
-                        variables.ydersList.append([[float('inf'), float('inf')]] * variables.epoch)
-                        variables.xseconddersList.append([[float('inf'), float('inf')]] * variables.epoch)
-                        variables.yseconddersList.append([[float('inf'), float('inf')]] * variables.epoch)
+                        variables.xdersList.append([float('inf')] * variables.epoch)
+                        variables.ydersList.append([float('inf')] * variables.epoch)
+                        variables.xseconddersList.append([float('inf')] * variables.epoch)
+                        variables.yseconddersList.append([float('inf')] * variables.epoch)
                         variables.dtwdistances.append([])
                 
                     #append each track to appropriate list
@@ -84,10 +93,10 @@ class Readin(Base):
                     if singleID not in allids:
                         idx = variables.ids.index(singleID)
                         variables.parentList[idx].append([float('inf'), float('inf')])
-                        variables.xdersList[idx].append([float('inf'), float('inf')])
-                        variables.ydersList[idx].append([float('inf'), float('inf')])
-                        variables.xseconddersList[idx].append([float('inf'), float('inf')])
-                        variables.yseconddersList[idx].append([float('inf'), float('inf')])
+                        variables.xdersList[idx].append(float('inf'))
+                        variables.ydersList[idx].append(float('inf'))
+                        variables.xseconddersList[idx].append(float('inf'))
+                        variables.yseconddersList[idx].append(float('inf'))
                 
                 currX = [point[0] for point in trackData]
                 currY = [point[1] for point in trackData]
@@ -125,7 +134,7 @@ class Readin(Base):
                 variables.allY.append(currY)
                 variables.epoch += 1
 
-                if variables.epoch % variables.pcarefresh == 0:
+                if variables.epoch % variables.pcarefresh == 0 and aliveids > 1:
                     variables.expair = []
                     variables.eypair = []
                     expair, eypair = unsupervised.pca()
