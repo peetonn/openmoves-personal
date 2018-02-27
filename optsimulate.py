@@ -6,7 +6,7 @@ import socket, time, json, time, random
 
 UDP_IP = "127.0.0.1"
 UDP_PORT = 21234
-PERIOD = .100        # how often to publish in time
+PERIOD = .0334        # how often to publish in time
 
 # For the random walk
 MAXSTEP_X = 10         

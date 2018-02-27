@@ -1,16 +1,34 @@
 import math
 import variables
 import numpy as np
+from itertools import islice
 
-#returns dtw distance between two paths as well as their warp path indices
-#can specify window size to go through time
-#use also with velocity vectors from kalman filter to find similar velocity periods, etc
+def settoorigin(path):
+    x0, y0 = path[0]
+    return [(x - x0, y - y0) for x, y in path]
+
+def rotatetox(path):
+    xn, yn = path[-1]
+    theta = math.atan2(-yn, xn)
+    return [(x*math.cos(theta) - y*math.sin(theta), x*math.sin(theta) + y*math.cos(theta)) for x, y in path]
+
+def slide(p, w=3):
+    it = iter(p)
+    result = tuple(islice(it, w))
+    if len(result) == w:
+        yield result
+    for elem in it:
+        result = result[1:] + (elem,)
+        yield result
+
+#returns dtw distance between paths
 """todo: 
         -next steps with dtw-- currently just used for path comparisons but
 can be applied to activity categorisation when using a reference dataset...
 for example: can be customised per performance to search for a particular movement
 sequence among all actors
-        -add support for z coordinate"""
+        -add support for z coordinate
+"""
 def dtw(p1, p2, window):
     dtwdict = {}
 
@@ -24,27 +42,39 @@ def dtw(p1, p2, window):
             dtwdict[(i, j)] = float("inf")#(0, 0, 0)
     dtwdict[(-1, -1)] = 0#(0, 0, 0)
 
+    p1 = settoorigin(p1)
+    p2 = settoorigin(p2)
+    p1 = rotatetox(p1)
+    p2 = rotatetox(p2)
+
     #do the dtw
     for i in range(len(p1)):
         for j in range(max(0, i - window), min(len(p2), i + window)):
             dist = ((p1[i][0] - p2[j][0]) ** 2) + ((p1[i][1] - p2[j][1]) ** 2)
             dtwdict[(i, j)] = dist + min(dtwdict[(i - 1, j)], dtwdict[(i, j-1)], dtwdict[(i-1, j-1)])#min((dtwdict[(i-1, j)], i-1, j), (dtwdict[(i, j-1)], i, j-1), (dtwdict[(i-1, j-1)], i-1, j-1), 
+    """ 
                 #key = lambda x: x[0]) #get the min distance with indices appended
             #dtwdict[(i, j)][0] += dist
 
     #get list indices for warp path
-    """indices = []
+    indices = []
     i, j = len(p1)-1, len(p2)-1
     while not (i == j == 0):
-        print(i)
-        print(j)
         indices.append((i-1, j-1))
         print(dtwdict[(i, j)])
         print(dtwdict[(i, j)][2])
-        i, j = dtwdict[(i, j)][1], dtwdict[(i, j)][2]"""
-    
-    return math.sqrt(dtwdict[len(p1)-1, len(p2)-1])#, indices.reverse()
+        i, j = dtwdict[(i, j)][1], dtwdict[(i, j)][2]
+    """
+    return math.sqrt(dtwdict[len(p1)-1, len(p2)-1]) #, indices.reverse()
 
+def slidingdtw(p1, p2, slidesize):
+    alldists = []
+    for outer in slide(p1, slidesize):
+        distances = []
+        for inner in slide(p2, slidesize):
+            distances.append(dtw(outer, inner, 0))
+        alldists.append(distances)
+    return alldists
 
 #kalman filter, commented heavily for personal reference
 #todo: factor in estimation of acceleration 
