@@ -47,14 +47,11 @@ class Readin(Base):
 
                 #parse as generated
                 msg = str(payload)
-                #end = msg.find("]}") + 2
-                #start = msg.find('{"header')
 
-                trackingData = json.loads(msg)#[start:end])
+                trackingData = json.loads(msg)
                 variables.SEQ = trackingData['header']['seq']
                 if trackingData['header']['frame_id'] == 'heartbeat':
                     aliveids = len(trackingData['alive_IDs'])
-                    print(aliveids)
                     continue
 
                 tracks = trackingData['people_tracks']
@@ -128,22 +125,24 @@ class Readin(Base):
                             else:
                                 distance = shorttime.dtw(path, otherpath, variables.shortwindow)
                                 variables.dtwdistances[idx].append(distance)
-
-                variables.allXY.append(currXY)
-                variables.allX.append(currX)
-                variables.allY.append(currY)
+                
+                if variables.visualize == 1:
+                    variables.allX.append(currX)
+                    variables.allY.append(currY)
+                
                 variables.epoch += 1
 
                 if variables.epoch % variables.pcarefresh == 0 and aliveids > 1:
-                    variables.expair = []
-                    variables.eypair = []
-                    expair, eypair = unsupervised.pca()
-                    expair = list(expair)
-                    eypair = list(eypair)
-                    expair[1] = expair[1].tolist()
-                    eypair[1] = eypair[1].tolist()
-                    variables.expair.append(expair)
-                    variables.eypair.append(eypair)
+                    #results ordered as: x1, y1, x2, y1,..., xn, yn
+                    variables.e1 = []
+                    variables.e2 = []
+                    e1, e2 = unsupervised.pca()
+                    e1 = list(e1)
+                    e2 = list(e2)
+                    e1[1] = e1[1].tolist()
+                    e2[1] = e2[1].tolist()
+                    variables.e1.append(e1)
+                    variables.e1.append(e2)
 
                 MESSAGE = json.dumps(publishing.packet())
                 payload = bytes(MESSAGE.encode('utf-8')) + bytes(bytearray(100))

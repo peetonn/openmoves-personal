@@ -7,9 +7,8 @@ import shapely.geometry as geometry
 from descartes import PolygonPatch
 
 """Unsupervised analysis module"""
-def covariance(): 
+def covariance(): #deprecated
     #ignore entries of resulting matrix with indicies not both odd or even
-    #todo: keep track of longest length for zero padding / otherwise account for different n in each timestep  
     #create a matrix such that each column is the x or y of a particular actor
     allXY = []
     for i in range(len(variables.allX)):
@@ -35,20 +34,7 @@ def covariance():
         truecov.append(currrow)
     return truecov
 
-def covarianceind():
-    print(variables.allX)
-<<<<<<< HEAD
-    print(variables.allY)
-=======
-    print('------')
-    print(variables.allY)
-    print('------')
-    print(np.asarray(variables.allX).T)
-    print('------')
-    print(np.asarray(variables.allY).T)
-    print('------')
-    print('------')
->>>>>>> 6c314e86a93931115f26dce7eacb930ee55c1f0f
+def covarianceind(): #deprecated
     covX = np.cov(np.asarray(variables.allX).T)
     covY = np.cov(np.asarray(variables.allY).T)
 
@@ -56,18 +42,22 @@ def covarianceind():
 
 def pca():
     #take cov matrices & evals/evects
-    xcov, ycov = covarianceind()
-    ex, vx = np.linalg.eig(xcov)
-    ey, vy = np.linalg.eig(ycov)
+    #xcov, ycov = covarianceind()
+    #ex, vx = np.linalg.eig(xcov)
+    #ey, vy = np.linalg.eig(ycov)
+    covs = np.cov(np.asarray(variables.parentList).T)
+    ea, va = np.linalg.eig(covs)
 
     #pair and sort the eigenvectors with respective eigenvalues
-    expairs = [(np.abs(ex[i]), vx[:,i]) for i in range(len(ex))]
-    eypairs = [(np.abs(ey[i]), vy[:,i]) for i in range(len(ex))]
-    expairs.sort(key=lambda x: x[0], reverse=True)
-    eypairs.sort(key=lambda x: x[0], reverse=True)
+    #expairs = [(np.abs(ex[i]), vx[:,i]) for i in range(len(ex))]
+    #eypairs = [(np.abs(ey[i]), vy[:,i]) for i in range(len(ex))]
+    #expairs.sort(key=lambda x: x[0], reverse=True)
+    #eypairs.sort(key=lambda x: x[0], reverse=True)
+    eapairs = [(np.abs(ea[i]), va[:,i]) for i in range(len(ea))]
+    eapairs.sort(key=lambda x: x[0], reverse=True)
 
     #return greatest of each
-    return expairs[0], eypairs[0]
+    return eapairs[0], eapairs[1]
 
 #dtw-based classification
 #iterate through template paths, find corresponding live paths

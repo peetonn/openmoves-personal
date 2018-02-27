@@ -2,11 +2,7 @@
 # Config file read-in vars initialized with None
 
 #general
-<<<<<<< HEAD
 PERIOD = .0334 
-=======
-PERIOD = .0334
->>>>>>> 6c314e86a93931115f26dce7eacb930ee55c1f0f
 UDP_IP = "127.0.0.1"
 UDP_PORT_IN = 21234
 UDP_PORT_OUT = 21235
@@ -24,8 +20,7 @@ ydersList = []
 xseconddersList = []
 yseconddersList = []
 
-#for use when sparsity doesn't matter
-allXY = []
+#for plotting (deprecated unsup use)
 allX = []
 allY = []
 
@@ -39,8 +34,8 @@ dtwrefresh = None
 shortclusterwindow = None
 hotspotwindow = None
 pcarefresh = None
-expair = []
-eypair = []
+e1 = []
+e2 = []
 
 hotSpots = []
 numClusts = []
