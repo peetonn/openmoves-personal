@@ -1,7 +1,7 @@
 import variables
 
 class Supervised:
-    """Supervised learning module"""
+    """Unsupervised learning module"""
 
     def __init__(self, ops, *args, **kwargs):
         self.ops = ops

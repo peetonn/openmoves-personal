@@ -2,7 +2,11 @@
 # Config file read-in vars initialized with None
 
 #general
+<<<<<<< HEAD
 PERIOD = .0334 
+=======
+PERIOD = .0334
+>>>>>>> 6c314e86a93931115f26dce7eacb930ee55c1f0f
 UDP_IP = "127.0.0.1"
 UDP_PORT_IN = 21234
 UDP_PORT_OUT = 21235
