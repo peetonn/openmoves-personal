@@ -3,14 +3,17 @@ openmoves
 
 Usage:
   openmoves readin
+  openmoves record --path
+  openmoves record --layout
   openmoves sample
-  openmoves -h | --help
+  openmoves --help
   openmoves --version
 
 Options:
   readin                            Run OpenMoves with options as configured in config.json
+  record --path | --layout          Run the OpenMoves recorder for either one single path or layout
   sample                            Run OpenMoves with sample simulator
-  -h --help                         Show this screen
+  --help                            Show this screen
   --version                         Show version
 
 Examples:

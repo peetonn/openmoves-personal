@@ -1,6 +1,5 @@
-from __future__ import print_function #can be ignored removed, used to supress an error in my particular editor
-
-import socket, time, json, time, random
+# -*- coding: utf-8 -*-
+import socket, time, json, random
 import shapely.geometry as geometry
 from descartes import PolygonPatch
 import matplotlib.pyplot as plt

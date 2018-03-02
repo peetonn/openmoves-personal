@@ -1,7 +1,7 @@
-from __future__ import print_function #can be ignored removed, used to supress an error in my particular editor
+# -*- coding: utf-8 -*-
 
-import socket, time, json, time, random, Math
-from sklearn.cluster import AffinityPropagation
+import socket, time, json, time, random, math
+import sklearn.cluster as cl
 from scipy import linalg
 import shapely.geometry as geometry
 from descartes import PolygonPatch
@@ -20,18 +20,9 @@ class Sample(Base):
 
 
     Calculate number of acute angles along convex hull to determine group shape
-
-    Adjust to number of LIVE IDs/perform live ID filtering
-
-    As discussed with Marco, implemeting the edge-of-stage functionality using
-    roslaunch opt_calibration network_assessment.launch which depends on having the OPT network calibrated.
-    How it works:  
-        -> we have the calibration parameters of each sensor that defines the FOV cone of each camera
-        -> given the extrinsic calibration of the network, can intersect the cones and get the area
     """
 
     def __init__(self, ops, *args, **kwargs):
-        print('init')
         self.ops = ops
         self.args = args
         self.kwargs = kwargs
@@ -57,7 +48,6 @@ class Sample(Base):
         self.allY = []
 
     def run(self):
-        print("test")
         plt.ion()
         plt.interactive(False)
         fig = plt.figure(figsize=(5,5))
@@ -74,10 +64,8 @@ class Sample(Base):
             [random.randrange(200)-100, random.randrange(200)-100, self.Z_NOMINAL] ] 
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        print("test1")
         try:
             while True:
-                print("test 2")
                 self.walk(walkers)
                 MESSAGE = json.dumps( self.packet( [ self.track(42, walkers[0][0], walkers[0][1], walkers[0][2], self._SEQ+100+random.random(), random.random()),
                                                 self.track(43, walkers[1][0], walkers[1][1], walkers[1][2], self._SEQ+100+random.random(), random.random()),
@@ -132,11 +120,11 @@ class Sample(Base):
                         prevpoint = self.parentList[idx][len(self.parentList[idx])-2]
                         self.xdersList[idx].append((x-prevpoint[0])/self.PERIOD)
                         self.ydersList[idx].append((y-prevpoint[1])/self.PERIOD)
-                        self.xseconddersList[idx].append(((self.xdersList[idx][0] - 
-                            self.xdersList[idx-1][0])/self.PERIOD))
-                        self.yseconddersList[idx].append(((self.ydersList[idx][1] - 
-                            self.ydersList[idx-1][1])/self.PERIOD))
-                        #ders.append((mx[i]-mx[i-1])/dt)
+                        if len(self.parentList[idx]) > 3:
+                            self.xseconddersList[idx].append(((self.xdersList[idx][0] - 
+                                self.xdersList[idx-1][0])/self.PERIOD))
+                            self.yseconddersList[idx].append(((self.ydersList[idx][1] - 
+                                self.ydersList[idx-1][1])/self.PERIOD))
                 
                 currX = [point[0] for point in trackData]
                 currY = [point[1] for point in trackData]
@@ -164,7 +152,7 @@ class Sample(Base):
                         for j in range(len(currentX)):
                             recentXY.append([currentX[j], currentY[j]])
 
-                    af = AffinityPropagation().fit(recentXY)
+                    af = cl.AffinityPropagation().fit(recentXY)
                     clusterCenters = af.cluster_centers_indices_
                     labs = af.labels_
                     nClusts = len(clusterCenters)
@@ -173,7 +161,7 @@ class Sample(Base):
                         hotSpots.append(recentXY[clusterCenters[i]])
 
                 #get clusters
-                af = AffinityPropagation().fit(currXY)
+                af = cl.AffinityPropagation().fit(currXY)
                 clusterCenters = af.cluster_centers_indices_
                 labs = af.labels_
                 nClusts = len(clusterCenters) #push to save at each time step
@@ -248,16 +236,16 @@ class Sample(Base):
                     if len(x) > 2:
                         x, y = convHull.exterior.coords.xy
                         if len(x) == 4:
-                            plt.text(centers[0] + 5, centers[1] + 5, r'triangle', fontdict={'size': 8})
+                            plt.text(center[0] + 5, center[1] + 5, r'triangle', fontdict={'size': 8})
                         if len(x) == 5:
-                            plt.text(centers[0] + 5, centers[1] + 5, r'quad', fontdict={'size': 8})
+                            plt.text(center[0] + 5, center[1] + 5, r'quad', fontdict={'size': 8})
                         if len(x) == 6:
-                            plt.text(centers[0] + 5, centers[1] + 5, r'pentagon', fontdict={'size': 8})
+                            plt.text(center[0] + 5, center[1] + 5, r'pentagon', fontdict={'size': 8})
                         if len(x) > 6:
-                            plt.text(centers[0] + 5, centers[1] + 5, r'poly', fontdict={'size': 8})
-                    plt.plot(centers[0], centers[1], 'y' + '*', zorder=4)
+                            plt.text(center[0] + 5, center[1] + 5, r'poly', fontdict={'size': 8})
+                    plt.plot(center[0], center[1], 'y' + '*', zorder=4)
                     for x in currXY[classMems]:
-                        plt.plot([centers[0], x[0]], [centers[1], x[1]], 'r' + '--', zorder=2)
+                        plt.plot([center[0], x[0]], [center[1], x[1]], 'r' + '--', zorder=2)
                 
                 plt.axis([-250,250,-250,250])
                 plt.pause(0.05)
@@ -393,22 +381,13 @@ class Sample(Base):
             indices.append((i-1, j-1))
             i, j = dtwdict[(i, j)][1], dtwdict[(i, j)][2]
 
-        return Math.sqrt(dtwdict[len(p1)-1, len(p2)-1]), indices.reverse()
+        return math.sqrt(dtwdict[len(p1)-1, len(p2)-1]), indices.reverse()
 
     #dtw-based classification, as per above todo
     #iterate through template paths, find corresponding live paths
     #use dtw distance as metric for closest corresponding template path
     def classify(self, live, template, window):
         pass
-
-    """
-    #fastdtw library, want to reduce dependence on tones of libs so not using
-    def usefastdtw(x1, x2):
-        import fastdtw
-
-        distance, path = fastdtw(x1, x2)
-        return disance, path
-    """
 
     #kalman filter, commented heavily for personal reference
     #todo: factor in estimation of acceleration 

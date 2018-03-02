@@ -13,12 +13,13 @@ openmoves.egg-info/top_level.txt
 openmoves/commands/__init__.py
 openmoves/commands/base.py
 openmoves/commands/readin.py
+openmoves/commands/record.py
 openmoves/commands/sample.py
 openmoves/commands/library/__init__.py
-openmoves/commands/library/deep.py
 openmoves/commands/library/instantaneous.py
 openmoves/commands/library/publishing.py
 openmoves/commands/library/shorttime.py
+openmoves/commands/library/supervised.py
 openmoves/commands/library/track.py
 openmoves/commands/library/unsupervised.py
 openmoves/commands/library/variables.py
