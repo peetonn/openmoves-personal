@@ -1,7 +1,18 @@
 import math
 import variables
 import numpy as np
+import threading
 from itertools import islice
+
+def split_processing(p1, p2):
+    threads = []
+    for i in range(len(variables.dtwwindows)):
+        threads.append(
+            threading.Thread(target=slidingdtw, args=(p1, p2, variables.dtwwindows[i])))
+        threads[-1].start()
+
+    for t in threads:
+        t.join()
 
 def settoorigin(path):
     x0, y0 = path[0]
