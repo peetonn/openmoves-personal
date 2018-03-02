@@ -23,8 +23,9 @@ xdersList = []
 ydersList = []
 xseconddersList = []
 yseconddersList = []
+orientations = []
 
-#for plotting (deprecated unsup use)
+#for plotting
 allX = []
 allY = []
 

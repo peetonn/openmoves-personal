@@ -31,6 +31,10 @@ def linedists(point):
             distances.append(up / math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2))
     return distances
 
+def orientation(idx):
+    if len(variables.xdersList[idx] > 0):
+        variables.orientations[idx].append(np.linalg.norm(variables.xdersList[idx][-1], variables.ydersList[idx][-1]))
+
 def pairwise(X, Y):
     tempPairs = []
     if(len(X) > len(Y)):

@@ -63,6 +63,7 @@ def dtw(p1, p2, window):
 
 def slidingdtw(p1, p2, slidesize):
     alldists = []
+    alldists.append(slidesize)
     for outer in slide(p1, slidesize):
         distances = []
         for inner in slide(p2, slidesize):

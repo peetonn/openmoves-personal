@@ -72,6 +72,7 @@ class Readin(Base):
                         variables.ydersList.append([float('nan')] * variables.epoch)
                         variables.xseconddersList.append([float('nan')] * variables.epoch)
                         variables.yseconddersList.append([float('nan')] * variables.epoch)
+                        variables.orientations.append([float('nan')] * variables.epoch)
                         variables.dtwdistances.append([])
                 
                     #append each track to appropriate list
@@ -94,6 +95,7 @@ class Readin(Base):
                         variables.ydersList[idx].append(float('nan'))
                         variables.xseconddersList[idx].append(float('nan'))
                         variables.yseconddersList[idx].append(float('nan'))
+                        variables.orientations[idx].append(float('nan'))
                 
                 currX = [point[0] for point in trackData]
                 currY = [point[1] for point in trackData]

@@ -19,8 +19,7 @@ def predict(train, test, w):
 
 def lbkeogh(p1, p2, r):
     lbsum = 0
-    for ind, i in enumerate(p1):
-        
+    for ind, i in enumerate(p1):       
         lower = min(p2[(ind-r if ind-r >=0 else 0):(ind+r)])
         upper = max(p2[(ind-r if ind-r >=0 else 0):(ind+r)])
         
