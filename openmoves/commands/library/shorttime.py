@@ -22,13 +22,7 @@ def slide(p, w=3):
         yield result
 
 #returns dtw distance between paths
-"""todo: 
-        -next steps with dtw-- currently just used for path comparisons but
-can be applied to activity categorisation when using a reference dataset...
-for example: can be customised per performance to search for a particular movement
-sequence among all actors
-        -add support for z coordinate
-"""
+#add support for z coordinate
 def dtw(p1, p2, window):
     dtwdict = {}
 

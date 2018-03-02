@@ -8,11 +8,15 @@ UDP_PORT_IN = 21234
 UDP_PORT_OUT = 21235
 SEQ = 0
 epoch = 0
-visualize = 0 # 0 or 1
+visualize = 0 
+trackheight = 0
 
 #instantaneous
 ids = []
 parentList = []
+
+pois = None
+stagepts = None
 
 pairs = []
 xdersList = []
@@ -26,12 +30,13 @@ allY = []
 
 #short time
 dtwdistances = []
-shorttimespan = None
+shorttimespan = None #unused
 shortwindow = None
 dtwrefresh = None
+dtwwindows = None
 
 #unsupervised
-shortclusterwindow = None
+shortclusterwindow = None #unused
 hotspotwindow = None
 pcarefresh = None
 e1 = []

@@ -6,12 +6,16 @@ def parse():
     with open(fn) as data_file:
         data = json.load(data_file)
     variables.visualize = data["visualize"]
-    variables.shorttimespan = data["shorttime"]
-    variables.shortwindow = data["windowsize"]
+    variables.trackheight = data["trackheight"]
+    variables.shorttimespan = data["shorttime"]["shorttime"]
+    variables.shortwindow = data["shorttime"]["windowsize"]
+    variables.dtwrefresh = data["shorttime"]["dtwrefresh"]
+    variables.dtwwindows = data["shorttime"]["dtwwindows"]
+    variables.pois = data["instantaneous"]["pois"]
+    variables.stagepts = data["instantaneous"]["stagepts"]
     variables.shortclusterwindow = data["unsupervised"]["shortclusterwindowsize"]
     variables.hotspotwindow = data["unsupervised"]["hotspotwindowsize"]
     variables.pcarefresh = data["unsupervised"]["pcarefresh"]
-    variables.dtwrefreh = data["dtwrefresh"]
 
 def packet():
     """
@@ -48,5 +52,5 @@ def secondPacket():
     sec = int(now)
     nsec = int((now-sec) * 1e9)
     header = {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}
-    return {"seq":variables.SEQ, "pca_x":variables.expair, "pca_y":variables.eypair, "dtwdistances":variables.dtwdistances, "idorder": variables.ids, "hotspots":variables.hotSpots}
+    return {"seq":variables.SEQ, "pca1":variables.e1, "pca2":variables.e2, "dtwdistances":variables.dtwdistances, "idorder": variables.ids, "hotspots":set(variables.hotSpots)}
     #"dtwdistances":variables.dtwdistances, "idorder": variables.ids, "hotspots":variables.hotSpots, 

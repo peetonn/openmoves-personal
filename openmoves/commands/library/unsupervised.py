@@ -45,6 +45,7 @@ def pca():
     #xcov, ycov = covarianceind()
     #ex, vx = np.linalg.eig(xcov)
     #ey, vy = np.linalg.eig(ycov)
+    print(np.asarray(variables.parentList))
     covs = np.cov(np.asarray(variables.parentList).T)
     ea, va = np.linalg.eig(covs)
 
@@ -59,13 +60,7 @@ def pca():
     #return greatest of each
     return eapairs[0], eapairs[1]
 
-#dtw-based classification
-#iterate through template paths, find corresponding live paths
-#use dtw distance as metric for closest corresponding template path
-def classify(live, template, window):
-    pass
-
-def hotClusts():
+def hotClusts(): #need to remove duplicates
     #hot locations analysis on recent time window (can adjust)
     if(len(variables.allX) > variables.hotspotwindow):
         recentXY = []

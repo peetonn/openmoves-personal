@@ -1,10 +1,18 @@
 {
 	"visualize":0,
 	"trackheight":0,
+
+	"instantaneous":{
+		"pois":[[5,10], [6,7], [80,3]],
+		"stagepts":[[0,0], [0,10], [10,10], [10,0]]
+	},
 	
-	"shorttime":10,
-	"windowsize":100,
-	"dtwrefresh":100,
+	"shorttime":{
+		"shorttime":10,
+		"windowsize":10,
+		"dtwrefresh":100,
+		"dtwwindows":[5, 10, 15]
+	},
 
 	"unsupervised":{
 		"shortclusterwindowsize": 30,

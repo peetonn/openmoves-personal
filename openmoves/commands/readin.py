@@ -67,11 +67,11 @@ class Readin(Base):
                 for singleID in allids:
                     if singleID not in variables.ids:
                         variables.ids.append(singleID)
-                        variables.parentList.append([[float('inf'), float('inf')]] * variables.epoch)
-                        variables.xdersList.append([float('inf')] * variables.epoch)
-                        variables.ydersList.append([float('inf')] * variables.epoch)
-                        variables.xseconddersList.append([float('inf')] * variables.epoch)
-                        variables.yseconddersList.append([float('inf')] * variables.epoch)
+                        variables.parentList.append([[float('nan'), float('nan')]] * variables.epoch)
+                        variables.xdersList.append([float('nan')] * variables.epoch)
+                        variables.ydersList.append([float('nan')] * variables.epoch)
+                        variables.xseconddersList.append([float('nan')] * variables.epoch)
+                        variables.yseconddersList.append([float('nan')] * variables.epoch)
                         variables.dtwdistances.append([])
                 
                     #append each track to appropriate list
@@ -89,11 +89,11 @@ class Readin(Base):
                 for singleID in variables.ids:
                     if singleID not in allids:
                         idx = variables.ids.index(singleID)
-                        variables.parentList[idx].append([float('inf'), float('inf')])
-                        variables.xdersList[idx].append(float('inf'))
-                        variables.ydersList[idx].append(float('inf'))
-                        variables.xseconddersList[idx].append(float('inf'))
-                        variables.yseconddersList[idx].append(float('inf'))
+                        variables.parentList[idx].append([float('nan'), float('nan')])
+                        variables.xdersList[idx].append(float('nan'))
+                        variables.ydersList[idx].append(float('nan'))
+                        variables.xseconddersList[idx].append(float('nan'))
+                        variables.yseconddersList[idx].append(float('nan'))
                 
                 currX = [point[0] for point in trackData]
                 currY = [point[1] for point in trackData]
