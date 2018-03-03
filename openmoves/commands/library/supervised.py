@@ -1,7 +1,33 @@
 import numpy as np
 import variables, shorttime
 
-#alexminnaar.com/time-series-classification-and-clustering-with-python.html
+def readin(t):
+    if t == "path":
+        x_path_file = open('library/data/paths_x.txt', 'r')
+        y_path_file = open('library/data/paths_y.txt', 'r')
+        z_path_file = open('library/data/paths_z.txt', 'r')
+        label_file = open('library/data/paths_l.txt', 'r')
+
+        # Create empty lists
+        x_path = []
+        y_path = []
+        z_path = []
+        l_path = []
+
+        # Loop through datasets
+        for x in x_path_file:
+            x_path.append([float(ts) for ts in x.split()])
+            
+        for y in y_path_file:
+            y_path.append([float(ts) for ts in y.split()])
+            
+        for z in z_path_file:
+            z_path.append([float(ts) for ts in z.split()])
+            
+        for y in y_test_file:
+            y_test.append(int(y.rstrip('\n')))
+    if t == "layout"
+
 def predict(train, test, w):
     predictions = []
     for ind, i in enumerate(test):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import socket, time, json, random
+import socket, time, json, random, csv
 import numpy as np
 
 from .base import Base
@@ -14,11 +14,21 @@ class Record(Base):
     def run(self):
         s_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-        s_in.bind(("", variables.UDP_PORT_IN))
-        print("waiting on port:", variables.UDP_PORT_IN)
+        s_in.bind(("", variables.UDP_PORT_IN+1))
+        print("waiting on port:", variables.UDP_PORT_IN+1)
 
         if self.ops["--path"] == true:
-            pass
+            x_path_file = open('library/data/paths_x.txt', 'w')
+            y_path_file = open('library/data/paths_y.txt', 'w')
+            z_path_file = open('library/data/paths_z.txt', 'w')
+            label_file = open('library/data/paths_l.txt', 'w')
+
+            # Create empty lists
+            x_path = []
+            y_path = []
+            z_path = []
+            l_path = []
+
         if self.ops["--layout"] == true:
             pass        
         try:

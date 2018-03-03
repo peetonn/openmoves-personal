@@ -3,6 +3,7 @@ import variables
 import numpy as np
 import threading
 from itertools import islice
+from scipy.stats.mstats import zscore
 
 def split_processing(p1, p2):
     threads = []
@@ -34,10 +35,10 @@ def slide(p, w=3):
 
 #returns dtw distance between paths
 #add support for z coordinate
-def dtw(p1, p2, window):
+def dtw_d(p1, p2, window):
     dtwdict = {}
 
-    #set window size... todo: generation of window size via cross-validation
+    #set window size
     if (window < abs(len(p1) - len(p2))):
         window = abs(len(p1) - len(p2))
 
@@ -72,13 +73,61 @@ def dtw(p1, p2, window):
     """
     return math.sqrt(dtwdict[len(p1)-1, len(p2)-1]) #, indices.reverse()
 
-def slidingdtw(p1, p2, slidesize):
+def dtw_i(p1, p2, window):
+    #set window size
+    if (window < abs(len(p1) - len(p2))):
+        window = abs(len(p1) - len(p2))
+
+    p1 = settoorigin(p1)
+    p2 = settoorigin(p2)
+    p1 = rotatetox(p1)
+    p2 = rotatetox(p2)
+
+    #do the dtw
+    x1 = []
+    x2 = []
+    y1 = []
+    y2 = []
+    for i in range(len(p1)):
+        x1.append(p1[i][0])
+        x2.append(p2[i][0])
+        y1.append(p1[i][1])
+        y2.append(p2[i][1])
+
+    x1 = zscore(x1)
+    x2 = zscore(x2)
+    y1 = zscore(y1)
+    y2 = zscore(y2)
+
+    x = dtw_1d(x1, x2, window)
+    y = dtw_1d(y1, y2, window)
+    return x + y
+
+def dtw_1d(p1, p2, window):
+    dtwdict = {}
+
+    for i in range(-1, len(p1)):
+        for j in range(-1, len(p2)):
+            dtwdict[(i, j)] = float("inf")
+    dtwdict[(-1, -1)] = 0
+  
+    for i in range(len(p1)):
+        for j in range(max(0, i - window), min(len(p2), i + window)):
+            dist = (p1[i] - p2[j])**2
+            dtwdict[(i, j)] = dist + min(dtwdict[(i-1, j)], dtwdict[(i, j-1)], dtwdict[(i-1, j-1)])
+		
+    return math.sqrt(dtwdict[len(p1) - 1, len(p2) - 1])
+
+def slidingdtw(p1, p2, slidesize, t="d"):
     alldists = []
     alldists.append(slidesize)
     for outer in slide(p1, slidesize):
         distances = []
         for inner in slide(p2, slidesize):
-            distances.append(dtw(outer, inner, 0))
+            if t == "i":
+                distances.append(dtw_i(outer, inner, slidesize))
+            else:
+                distances.append(dtw_d(outer, inner, slidesize))
         alldists.append(distances)
     return alldists
 
