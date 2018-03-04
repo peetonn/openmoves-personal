@@ -1,5 +1,6 @@
 import numpy as np
-import variables, shorttime
+import variables, shorttime, math
+from scipy.stats.mstats import zscore
 
 def readin(t):
     if t == "path":
@@ -7,39 +8,60 @@ def readin(t):
         y_path_file = open('library/data/paths_y.txt', 'r')
         z_path_file = open('library/data/paths_z.txt', 'r')
         label_file = open('library/data/paths_l.txt', 'r')
-
-        # Create empty lists
-        x_path = []
-        y_path = []
-        z_path = []
-        l_path = []
+        variables.x_path = []
+        variables.y_path = []
+        variables.z_path = []
+        variables.l_path = []
 
         # Loop through datasets
         for x in x_path_file:
-            x_path.append([float(ts) for ts in x.split()])
+            variables.x_path.append([float(ts) for ts in x.split()])
             
         for y in y_path_file:
-            y_path.append([float(ts) for ts in y.split()])
+            variables.y_path.append([float(ts) for ts in y.split()])
             
         for z in z_path_file:
-            z_path.append([float(ts) for ts in z.split()])
+            variables.z_path.append([float(ts) for ts in z.split()])
             
-        for y in y_test_file:
-            y_test.append(int(y.rstrip('\n')))
-    if t == "layout"
+        for l in label_file:
+            variables.l_path.append(int(l.rstrip('\n')))
 
-def predict(train, test, w):
+    if t == "layout":
+        x_layout_file = open('library/data/layouts_x.txt', 'r')
+        y_layout_file = open('library/data/layouts_y.txt', 'r')
+        z_layout_file = open('library/data/layouts_z.txt', 'r')
+        label_file = open('library/data/layouts_l.txt', 'r')
+
+        variables.x_layout = []
+        variables.y_layout = []
+        variables.z_layout = []
+        variables.l_layout = []
+
+        # Loop through datasets
+        for x in x_layout_file:
+            variables.x_layout.append([float(ts) for ts in x.split()])
+            
+        for y in y_layout_file:
+            variables.y_layout.append([float(ts) for ts in y.split()])
+            
+        for z in z_layout_file:
+            variables.z_layout.append([float(ts) for ts in z.split()])
+            
+        for y in label_file:
+            variables.l_layout.append(int(l.rstrip('\n')))
+
+def predict(test, w):
     predictions = []
     for ind, i in enumerate(test):
         mindist = float('inf')
         closest = []
 
-        for j in train:
-            if lbkeogh(i, j[:-1], 5) < mindist:
-                dist = shorttime.dtw(i, j[:-1], w)
-                if dist < mindist:
-                    mindist = dist
-                    closest = j
+        for i, j in variables.x_path, variables.y_path:
+            #if lbkeogh(i, j[:-1], 5) < mindist:
+            dist = dtw_i(i, j, w)
+            if dist < mindist:
+                mindist = dist
+                closest = j
         predictions.append(closest[-1])
     return predictions
 
@@ -56,8 +78,58 @@ def lbkeogh(p1, p2, r):
     
     return np.sqrt(lbsum)
 
-#dtw-based classification
-#iterate through template paths, find corresponding live paths
-#use dtw distance as metric for closest corresponding template path
-def classify(live, template, window):
-    pass
+def dtw_i(x, y, path, window):
+    #set window size
+    if (window < abs(len(x) - len(path))):
+        window = abs(len(x) - len(path))
+    
+    xy = []
+    for i in range(len(i)):
+        xy.append([x[i], y[i]])
+
+    xy = shorttime.settoorigin(xy)
+    path = shorttime.settoorigin(path)
+    xy = shorttime.rotatetox(xy)
+    path = shorttime.rotatetox(path)
+
+    #do the dtw
+    px = []
+    py = []
+    x = []
+    y = []
+
+    for i in range(len(path[0])):
+        px.append(path[i][0])
+        py.append(path[i][1])
+
+    for j in range(len(xy[0])):
+        x.append(xy[j][0])
+        y.append(xy[j][1])
+    
+    x = x[~np.isnan(x)].tolist()
+    y = y[~np.isnan(y)].tolist()
+    px = zscore(px)
+    py = zscore(py)
+    x = zscore(x)
+    y = zscore(y)
+
+    x = dtw_1d(x, px, window)
+    y = dtw_1d(y, py, window)
+    return x + y
+
+def dtw_1d(p1, p2, window):
+    dtwdict = {}
+
+    for i in range(-1, len(p1)):
+        for j in range(-1, len(p2)):
+            dtwdict[(i, j)] = float("inf")
+    dtwdict[(-1, -1)] = 0
+  
+    for i in range(len(p1)):
+        for j in range(max(0, i - window), min(len(p2), i + window)):
+            dist = (p1[i] - p2[j])**2
+            dtwdict[(i, j)] = dist + min(dtwdict[(i-1, j)], dtwdict[(i, j-1)], dtwdict[(i-1, j-1)])
+		
+    return math.sqrt(dtwdict[len(p1) - 1, len(p2) - 1])
+
+

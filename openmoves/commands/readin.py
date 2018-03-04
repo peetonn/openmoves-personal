@@ -52,7 +52,7 @@ class Readin(Base):
                 if trackingData['header']['frame_id'] == 'heartbeat':
                     aliveids = len(trackingData['alive_IDs'])
                     continue
-
+                
                 tracks = trackingData['people_tracks']
                 if tracks == []:
                     continue
@@ -124,7 +124,7 @@ class Readin(Base):
                             if path == otherpath:
                                 continue
                             else:
-                                distance = shorttime.dtw(path, otherpath, variables.shortwindow)
+                                distance = shorttime.dtw_i(path, otherpath, variables.shortwindow)
                                 variables.dtwdistances[idx].append(distance)
                 
                 if variables.visualize == 1:

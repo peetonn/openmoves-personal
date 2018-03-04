@@ -49,3 +49,14 @@ centers = []
 clusters = []
 bounds = []
 spreads = []
+
+#supervised
+x_layout = []
+y_layout = []
+z_layout = []
+l_layout = []
+
+x_path = []
+y_path = []
+z_path = []
+l_path = []

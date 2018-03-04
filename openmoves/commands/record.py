@@ -18,19 +18,16 @@ class Record(Base):
         print("waiting on port:", variables.UDP_PORT_IN+1)
 
         if self.ops["--path"] == true:
-            x_path_file = open('library/data/paths_x.txt', 'w')
-            y_path_file = open('library/data/paths_y.txt', 'w')
-            z_path_file = open('library/data/paths_z.txt', 'w')
-            label_file = open('library/data/paths_l.txt', 'w')
-
-            # Create empty lists
-            x_path = []
-            y_path = []
-            z_path = []
-            l_path = []
+            x_path_file = open('library/data/paths_x.txt', 'wt')
+            y_path_file = open('library/data/paths_y.txt', 'wt')
+            z_path_file = open('library/data/paths_z.txt', 'wt')
+            label_file = open('library/data/paths_l.txt', 'wt')
 
         if self.ops["--layout"] == true:
-            pass        
+            x_layout_file = open('library/data/layouts_x.txt', 'wt')
+            y_layout_file = open('library/data/layouts_y.txt', 'wt')
+            z_layout_file = open('library/data/layouts_z.txt', 'wt')
+            label_file = open('library/data/layouts_l.txt', 'wt')
         try:
             while True:
                 if variables.visualize == 1:
