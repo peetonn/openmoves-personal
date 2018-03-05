@@ -18,7 +18,7 @@ setup(
     author_email = 'samamin@ucla.edu',
     keywords = 'cli',
     packages = find_packages(exclude=['docs']),
-    install_requires = ['docopt'],
+    install_requires = ['docopt', 'socket', 'time', 'json', 'random', 'shapely', 'descartes', 'matplotlib', 'numpy', 'collections', 'sklearn', 'scipy', 'os', 'math', 'csv'],
     entry_points = {
         'console_scripts': [
             'openmoves=openmoves.cli:main',

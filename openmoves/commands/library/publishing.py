@@ -1,4 +1,5 @@
-import variables, time, json, os
+import variables, time, json, os, 
+from collections import OrderedDict
 
 def parse():
     """function to parse the config file"""
@@ -31,15 +32,15 @@ def packet():
     now = float(time.time())
     sec = int(now)
     nsec = int((now-sec) * 1e9)
-    header = {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}
+    header = OrderedDict("seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec})
 
     firstdirs = []
     seconddirs = []
     for i in range(len(variables.ids)):
         if len(variables.xdersList[i]) == variables.epoch-2 and variables.epoch > 2:
-            firstdirs.append({"id":variables.ids[i], "x":variables.xdersList[i][-1], "y":variables.ydersList[i][-1]})
+            firstdirs.append([variables.xdersList[i][-1], variables.ydersList[i][-1]])
         if len(variables.xdersList[i]) == variables.epoch-2 and variables.epoch > 3:
-            seconddirs.append({"id":variables.ids[i], "x":variables.xseconddersList[i][-1], "y":variables.yseconddersList[i][-1]})
+            seconddirs.append([variables.xseconddersList[i][-1], variables.yseconddersList[i][-1]])
     pairs = variables.pairs[-1]
     centers = variables.centers[-1]
     clusters = variables.clusters[-1]
@@ -53,4 +54,3 @@ def secondPacket():
     nsec = int((now-sec) * 1e9)
     header = {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}
     return {"seq":variables.SEQ, "pca1":variables.e1, "pca2":variables.e2, "dtwdistances":variables.dtwdistances, "idorder": variables.ids, "hotspots":set(variables.hotSpots)}
-    #"dtwdistances":variables.dtwdistances, "idorder": variables.ids, "hotspots":variables.hotSpots, 
