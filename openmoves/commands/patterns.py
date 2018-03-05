@@ -17,8 +17,11 @@ class Patterns(Base):
 
     def run(self):
         epoch = 0
+        lastAssess = 0
         s_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        supervised.readin("path")
 
         s_in.bind(("", 21234))
         print("waiting on port:", 21234)
@@ -33,21 +36,30 @@ class Patterns(Base):
                 msg = str(payload)
 
                 trackingData = json.loads(msg)
-            
+
+                if trackingData['header']['frame_id'] == 'heartbeat':
+                    aliveids = len(trackingData['alive_IDs'])
+                    continue
+
                 tracks = trackingData['people_tracks']
                 if tracks == []:
                     continue
 
+                #print(maxx, maxy, minx, miny)
+                #(4.79668, 5.13825, -3.98568, -3.31501)
+
                 trackData = []
                 for singletrack in tracks:
+                    if singletrack['x'] < -3.7 or singletrack['x'] > 4.5 or singletrack['y'] < -3.1 or singletrack['y'] > 4.9:
+                        continue
                     trackData.append([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
 
                 #create/update list of IDs
                 allids = [singletrack[0] for singletrack in trackData]
                 for singleID in allids:
-                    if singleID not in variables.ids:
+                    if singleID not in self.ids:
                         self.ids.append(singleID)
-                        self.parentList.append([[float('nan'), float('nan')]] * variables.epoch)
+                        self.parentList.append([[float('nan'), float('nan')]] * epoch)
                         self.dtwdistances.append([])
                 
                     #append each track to appropriate list
@@ -57,25 +69,37 @@ class Patterns(Base):
                             del singletrack[0]
                             del singletrack[2]
                             childList = singletrack
-                    idx = variables.ids.index(singleID)
-                    variables.parentList[idx].append(childList)
+                    idx = self.ids.index(singleID)
+                    self.parentList[idx].append(childList)
                
-                for singleID in variables.ids:
+                for singleID in self.ids:
                     if singleID not in allids:
-                        idx = variables.ids.index(singleID)
-                        variables.parentList[idx].append([float('nan'), float('nan')])
+                        idx = self.ids.index(singleID)
+                        self.parentList[idx].append([float('nan'), float('nan')])
 
-                if variables.epoch % 50 == 0:
+                """if epoch % 50 == 0:
                     for singleID in allids:
                         idx = self.ids.index(singleID)
                         path = self.parentList[idx]
                         for singleID in allids:
-                            idx2 = variables.ids.index(singleID)
-                            otherpath = variables.parentList[idx2]
+                            idx2 = self.ids.index(singleID)
+                            otherpath = self.parentList[idx2]
                             if path == otherpath:
                                 continue
                             else:
                                 self.dtwdistances[idx].append(shorttime.slidingdtw(path, otherpath, 20))
+                """
+                if epoch % 450 == 0:
+                    supervised.readin("path")
 
-                supervised.readin("path")
+                if epoch % 30 == 0:   
+                    for singleID in allids:
+                        idx = self.ids.index(singleID)
+                        path = self.parentList[idx]
+                        #print("enter predict")
+                        supervised.predict(path, singleID)
+
                 epoch = epoch + 1
+        
+        except KeyboardInterrupt:
+            pass 

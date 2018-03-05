@@ -42,14 +42,24 @@ class Record(Base):
 
                 #parse as generated
                 msg = str(payload)
-
                 trackingData = json.loads(msg)
+
+                if trackingData['header']['frame_id'] == 'heartbeat':
+                    aliveids = len(trackingData['alive_IDs'])
+                    continue
+
                 tracks = trackingData['people_tracks']
                 if tracks == []:
                     continue
 
+                #print(maxx, maxy, minx, miny)
+                #(4.79668, 5.13825, -3.98568, -3.31501)
+
                 trackData = []
                 for singletrack in tracks:
+                    if singletrack['x'] < -3.7 or singletrack['x'] > 4.5 or singletrack['y'] < -3.1 or singletrack['y'] > 4.9:
+                        continue
+                    print([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
                     trackData.append([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
                 
                 self.x.append(trackData[0][1])
@@ -64,4 +74,4 @@ class Record(Base):
             wr = csv.writer(z_path_file)
             wr.writerow(self.z)
 
-            label_file.write(str(input("Enter label:")))
+            label_file.write(str(input("Enter label:"))+'\n')

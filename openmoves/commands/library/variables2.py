@@ -3,12 +3,12 @@
 
 #general
 PERIOD = .0334 
-UDP_IP = "255.255.255.255"
+UDP_IP = "127.0.0.1"
 UDP_PORT_IN = 21234
 UDP_PORT_OUT = 21235
 SEQ = 0
 epoch = 0
-visualize = 0
+visualize = 0 
 trackheight = 0
 
 #instantaneous

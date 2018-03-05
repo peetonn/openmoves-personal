@@ -18,7 +18,7 @@ setup(
     author_email = 'samamin@ucla.edu',
     keywords = 'cli',
     packages = find_packages(exclude=['docs']),
-    install_requires = ['docopt', 'shapely', 'descartes', 'matplotlib', 'numpy', 'sklearn', 'scipy', 'cython', 'ucrdtw'],
+    install_requires = ['docopt', 'shapely', 'descartes', 'matplotlib', 'numpy', 'sklearn', 'scipy', 'cython', 'fastdtw'],
     entry_points = {
         'console_scripts': [
             'openmoves=openmoves.cli:main',

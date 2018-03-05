@@ -29,7 +29,10 @@ class Readin(Base):
         fig = plt.figure(figsize=(5,5)) 
 
         s_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        
         s_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s_out.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST,1)
+
 
         s_in.bind(("", variables.UDP_PORT_IN))
         print("waiting on port:", variables.UDP_PORT_IN)
@@ -57,8 +60,13 @@ class Readin(Base):
                 if tracks == []:
                     continue
 
+                #print(maxx, maxy, minx, miny)
+                #(4.79668, 5.13825, -3.98568, -3.31501)
+
                 trackData = []
                 for singletrack in tracks:
+                    if singletrack['x'] < -3.98568 or singletrack['x'] > 4.79668 or singletrack['y'] < -3.31501 or singletrack['y'] > 5.13825:
+                        continue
                     trackData.append([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
 
                 #create/update list of IDs
@@ -154,10 +162,13 @@ class Readin(Base):
                 MESSAGE = json.dumps(publishing.packet())
                 payload = bytes(MESSAGE.encode('utf-8')) + bytes(bytearray(100))
                 s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
 
                 MESSAGE = json.dumps(publishing.secondPacket())
                 payload = bytes(MESSAGE.encode('utf-8')) + bytes(bytearray(100))
                 s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+
+                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
 
                 if variables.visualize == 1:
                     visualize.pltPaths()
