@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-import socket, time, json, random
+import socket, time, json, random, fastdtw
 import shapely.geometry as geometry
 from descartes import PolygonPatch
 import matplotlib.pyplot as plt
 import numpy as np
-from collections import OrderedDict
 
 import library.variables as variables
 import library.instantaneous as instantaneous
@@ -125,7 +124,7 @@ class Readin(Base):
                             if path == otherpath:
                                 continue
                             else:
-                                distance = shorttime.dtw_i(path, otherpath, variables.shortwindow)
+                                distance = shorttime.doFastDTW(path, otherpath)
                                 variables.dtwdistances[idx].append(distance)
                 
                 if variables.visualize == 1:
@@ -134,7 +133,7 @@ class Readin(Base):
                 
                 variables.epoch += 1
 
-                if variables.epoch % variables.pcarefresh == 0 and aliveids > 1:
+                """if variables.epoch % variables.pcarefresh == 0 and aliveids > 1:
                     #results ordered as: x1, y1, x2, y1,..., xn, yn
                     variables.e1 = []
                     variables.e2 = []
@@ -144,7 +143,7 @@ class Readin(Base):
                     e1[1] = e1[1].tolist()
                     e2[1] = e2[1].tolist()
                     variables.e1.append(e1)
-                    variables.e1.append(e2)
+                    variables.e1.append(e2)"""
 
                 MESSAGE = json.dumps(publishing.packet())
                 payload = bytes(MESSAGE.encode('utf-8')) + bytes(bytearray(100))

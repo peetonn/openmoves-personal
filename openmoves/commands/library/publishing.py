@@ -1,5 +1,4 @@
-import variables, time, json, os, 
-from collections import OrderedDict
+import variables, time, json, os 
 
 def parse():
     """function to parse the config file"""
@@ -32,7 +31,7 @@ def packet():
     now = float(time.time())
     sec = int(now)
     nsec = int((now-sec) * 1e9)
-    header = OrderedDict("seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec})
+    header = {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}
 
     firstdirs = []
     seconddirs = []
@@ -53,4 +52,4 @@ def secondPacket():
     sec = int(now)
     nsec = int((now-sec) * 1e9)
     header = {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}
-    return {"seq":variables.SEQ, "pca1":variables.e1, "pca2":variables.e2, "dtwdistances":variables.dtwdistances, "idorder": variables.ids, "hotspots":set(variables.hotSpots)}
+    return {"seq":variables.SEQ, "pca1":variables.e1, "pca2":variables.e2, "dtwdistances":variables.dtwdistances, "idorder": variables.ids, "hotspots":list(set(variables.hotSpots))}

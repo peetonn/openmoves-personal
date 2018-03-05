@@ -32,7 +32,7 @@ def packet( tracks ) :
     sec = int(now)
     nsec = int((now-sec) * 1e9)
     header = { "seq":_SEQ, "stamp": {"sec":sec, "nsec":nsec}, "frame_id":"world" }
-    return { "header":header, "tracks":tracks } 
+    return { "header":header, "people_tracks":tracks } 
 
 # Provide two random walkers 
 # More is exercise for reader ... 

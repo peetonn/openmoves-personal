@@ -50,34 +50,44 @@ def readin(t):
         for y in label_file:
             variables.l_layout.append(int(l.rstrip('\n')))
 
-def predict(test, w):
+def predict(test):
     predictions = []
-    for ind, i in enumerate(test):
-        mindist = float('inf')
-        closest = []
+    #for i in enumerate(test):
+    mindist = float('inf')
+    closest = []
 
-        for i, j in variables.x_path, variables.y_path:
-            #if lbkeogh(i, j[:-1], 5) < mindist:
-            dist = dtw_i(i, j, w)
+    for i, j, k in variables.x_path, variables.y_path, variables.l_path:
+        comp = []
+        for k in range(len(i)):
+            comp.append([i[k], j[k]])
+        comp = shorttime.makerotationinvariant(comp)
+        comp = shorttime.iterativeNormalization(comp)
+        comp = interpolate(comp)
+        test = shorttime.makerotationinvariant(test)
+        test = shorttime.iterativeNormalization(test)
+        test = interpolate(test)
+        if lbkeogh(test, comp, 5) < mindist:
+            dist = fastdtw.fastdtw(test, comp, dist=shorttime.dist)
             if dist < mindist:
                 mindist = dist
-                closest = j
-        predictions.append(closest[-1])
+                closest = k
+    predictions.append(closest)
     return predictions
 
 def lbkeogh(p1, p2, r):
     lbsum = 0
     for ind, i in enumerate(p1):       
-        lower = min(p2[(ind-r if ind-r >=0 else 0):(ind+r)])
-        upper = max(p2[(ind-r if ind-r >=0 else 0):(ind+r)])
+        lower = min(p2[(ind - r if ind - r > = 0 else 0):(ind + r)])
+        upper = max(p2[(ind - r if ind - r > = 0 else 0):(ind + r)])
         
         if i > upper:
-            lbsum = lbsum + (i-upper)**2
+            lbsum = lbsum + (i - upper)**2
         elif i < lower:
-            lbsum = lbsum + (i-lower)**2
+            lbsum = lbsum + (i - lower)**2
     
     return np.sqrt(lbsum)
 
+"""
 def dtw_i(x, y, path, window):
     #set window size
     if (window < abs(len(x) - len(path))):
@@ -131,5 +141,6 @@ def dtw_1d(p1, p2, window):
             dtwdict[(i, j)] = dist + min(dtwdict[(i-1, j)], dtwdict[(i, j-1)], dtwdict[(i-1, j-1)])
 		
     return math.sqrt(dtwdict[len(p1) - 1, len(p2) - 1])
+"""
 
 
