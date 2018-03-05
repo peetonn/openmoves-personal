@@ -52,4 +52,5 @@ def secondPacket():
     sec = int(now)
     nsec = int((now-sec) * 1e9)
     header = {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}
-    return {"seq":variables.SEQ, "pca1":variables.e1, "pca2":variables.e2, "dtwdistances":variables.dtwdistances, "idorder": variables.ids, "hotspots":list(set(variables.hotSpots))}
+    return {"seq":variables.SEQ, "dtwdistances":variables.dtwdistances, "idorder": variables.ids, "hotspots":list(set(variables.hotSpots))}
+    #"pca1":variables.e1, "pca2":variables.e2, 

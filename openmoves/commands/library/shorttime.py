@@ -101,11 +101,37 @@ def slidingdtw(p1, p2, slidesize):
     alldists = []
     alldists.append(slidesize)
     for outer in slide(p1, slidesize):
-        distances = []
+        mindist = float('inf')
+        closest = []
+        outer = makerotationinvariant(outer)
+        outer = iterativeNormalization(outer)
+        outer = interpolate(outer)
+        del p2[:variables.lastlength]
         for inner in slide(p2, slidesize):
-            distances.append(doFastDTW(outer, inner))
-        alldists.append(distances)
+            inner2 = makerotationinvariant(inner)
+            inner2 = iterativeNormalization(inner)
+            inner2 = interpolate(inner)
+            if lbkeogh(outer, inner, 5) < mindist:
+                distn, ind = fastdtw.fastdtw(outer, inner2, dist=dist)
+                if distn < mindist:
+                    mindist = distn
+                    closest.append([distn, inner])
+        alldists.append(closest[-3:])
+    variables.lastlength = len(p1)
     return alldists
+
+def lbkeogh(p1, p2, r):
+    lbsum = 0
+    for ind, i in enumerate(p1):       
+        lower = min(p2[(ind - r if ind - r >= 0 else 0):(ind + r)])
+        upper = max(p2[(ind - r if ind - r >= 0 else 0):(ind + r)])
+        
+        if i > upper:
+            lbsum = lbsum + (i - upper)**2
+        elif i < lower:
+            lbsum = lbsum + (i - lower)**2
+    
+    return np.sqrt(lbsum)
 
 """
 def settoorigin(path):

@@ -1,5 +1,5 @@
 import numpy as np
-import variables, shorttime, math
+import variables, shorttime, math, csv
 from scipy.stats.mstats import zscore
 
 def readin(t):
@@ -8,28 +8,19 @@ def readin(t):
         y_path_file = open('library/data/paths_y.txt', 'r')
         z_path_file = open('library/data/paths_z.txt', 'r')
         label_file = open('library/data/paths_l.txt', 'r')
-        variables.x_path = []
-        variables.y_path = []
-        variables.z_path = []
-        variables.l_path = []
-
-        # Loop through datasets
-        for x in x_path_file:
-            variables.x_path.append([float(ts) for ts in x.split()])
-            
-        for y in y_path_file:
-            variables.y_path.append([float(ts) for ts in y.split()])
-            
-        for z in z_path_file:
-            variables.z_path.append([float(ts) for ts in z.split()])
-            
-        for l in label_file:
-            variables.l_path.append(int(l.rstrip('\n')))
+        
+        reader = csv.reader(x_path_file)
+        variables.x_path = list(reader)
+        reader = csv.reader(y_path_file)
+        variables.y_path = list(reader)
+        reader = csv.reader(z_path_file)
+        variables.z_path = list(reader)
+        variables.l_path = label_file.read().splitlines()
 
     if t == "layout":
-        x_layout_file = open('library/data/layouts_x.txt', 'r')
-        y_layout_file = open('library/data/layouts_y.txt', 'r')
-        z_layout_file = open('library/data/layouts_z.txt', 'r')
+        x_layout_file = open('library/data/layouts_x.csv', 'r')
+        y_layout_file = open('library/data/layouts_y.csv', 'r')
+        z_layout_file = open('library/data/layouts_z.csv', 'r')
         label_file = open('library/data/layouts_l.txt', 'r')
 
         variables.x_layout = []
@@ -56,21 +47,24 @@ def predict(test):
     mindist = float('inf')
     closest = []
 
-    for i, j, k in variables.x_path, variables.y_path, variables.l_path:
+    for i, j, l in variables.x_path, variables.y_path, variables.l_path:
         comp = []
         for k in range(len(i)):
             comp.append([i[k], j[k]])
+
         comp = shorttime.makerotationinvariant(comp)
         comp = shorttime.iterativeNormalization(comp)
         comp = interpolate(comp)
+
         test = shorttime.makerotationinvariant(test)
         test = shorttime.iterativeNormalization(test)
         test = interpolate(test)
+        
         if lbkeogh(test, comp, 5) < mindist:
             dist = fastdtw.fastdtw(test, comp, dist=shorttime.dist)
             if dist < mindist:
                 mindist = dist
-                closest = k
+                closest = l
     predictions.append(closest)
     return predictions
 

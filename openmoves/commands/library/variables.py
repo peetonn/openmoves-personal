@@ -30,9 +30,10 @@ allX = []
 allY = []
 
 #short time
+lastlength = 0
 dtwdistances = []
 shorttimespan = None #unused
-shortwindow = None
+shortwindow = None #unused
 dtwrefresh = None
 dtwwindows = None
 

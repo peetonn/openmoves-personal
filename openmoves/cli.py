@@ -5,6 +5,7 @@ Usage:
   openmoves readin
   openmoves record --path
   openmoves record --layout
+  openmoves patterns
   openmoves sample
   openmoves --help
   openmoves --version

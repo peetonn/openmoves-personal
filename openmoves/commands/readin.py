@@ -112,20 +112,26 @@ class Readin(Base):
                 #take upper triangular only, no redundant distances
                 #tempPairsTriu = list(np.asarray(tempPairs)[np.triu_indices(len(currX),1)])
                 variables.pairs.append(tempPairs)
-
+                """
                 if variables.epoch % 50 == 0:
+                    #doneids = []
                     for singleID in allids:
                         idx = variables.ids.index(singleID)
                         path = variables.parentList[idx]
-                        variables.dtwdistances[idx] = []
+                        #variables.dtwdistances[idx] = []
                         for singleID in allids:
+                            #if singleID in doneids:
+                            #    continue
                             idx2 = variables.ids.index(singleID)
                             otherpath = variables.parentList[idx2]
                             if path == otherpath:
                                 continue
                             else:
-                                distance = shorttime.doFastDTW(path, otherpath)
-                                variables.dtwdistances[idx].append(distance)
+                                #distance = shorttime.doFastDTW(path, otherpath)
+                                variables.dtwdistances[idx].append(shorttime.slidingdtw(path, otherpath, 20))
+                                #variables.dtwdistances[idx].append(distance)
+                        #doneids.append(singleID)
+                """
                 
                 if variables.visualize == 1:
                     variables.allX.append(currX)
