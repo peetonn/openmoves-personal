@@ -25,6 +25,8 @@ xseconddersList = []
 yseconddersList = []
 orientations = []
 
+aliveIDs = []
+
 #for plotting
 allX = []
 allY = []

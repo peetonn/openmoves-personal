@@ -51,6 +51,7 @@ class Readin(Base):
                 variables.SEQ = trackingData['header']['seq']
                 if trackingData['header']['frame_id'] == 'heartbeat':
                     aliveids = len(trackingData['alive_IDs'])
+                    variables.aliveIDs = trackingData['alive_IDs']
                     continue
                 
                 tracks = trackingData['people_tracks']
