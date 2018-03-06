@@ -19,7 +19,7 @@ class Patterns(Base):
         epoch = 0
         lastAssess = 0
         s_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        #s_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         supervised.readin("path")
 

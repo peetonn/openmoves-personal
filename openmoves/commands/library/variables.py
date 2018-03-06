@@ -13,6 +13,7 @@ trackheight = 0
 
 #instantaneous
 ids = []
+aliveIDs = []
 parentList = []
 
 pois = None

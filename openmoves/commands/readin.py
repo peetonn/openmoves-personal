@@ -54,6 +54,7 @@ class Readin(Base):
                 variables.SEQ = trackingData['header']['seq']
                 if trackingData['header']['frame_id'] == 'heartbeat':
                     aliveids = len(trackingData['alive_IDs'])
+                    #variables.aliveIDs = trackingData['alive_IDs']
                     continue
                 
                 tracks = trackingData['people_tracks']
@@ -71,6 +72,7 @@ class Readin(Base):
 
                 #create/update list of IDs
                 allids = [singletrack[0] for singletrack in trackData]
+                variables.aliveIDs = [singletrack[0] for singletrack in trackData]
                 for singleID in allids:
                     if singleID not in variables.ids:
                         variables.ids.append(singleID)
@@ -92,7 +94,7 @@ class Readin(Base):
                     idx = variables.ids.index(singleID)
                     variables.parentList[idx].append(childList)
 
-                    instantaneous.ders(idx, childList)
+                    instantaneous.ders(idx, childList)                    
                
                 for singleID in variables.ids:
                     if singleID not in allids:
