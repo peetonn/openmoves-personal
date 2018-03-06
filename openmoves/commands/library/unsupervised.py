@@ -70,7 +70,6 @@ def hotClusts(): #need to remove duplicates
             currentY = variables.allY[len(variables.allX)-i]
             for j in range(len(currentX)):
                 if currentX[j] != float('nan') and currentY[j] != float('nan'):
-                    #print([currentX[j], currentY[j]])
                     recentXY.append([currentX[j], currentY[j]])
 
         af = AffinityPropagation().fit(recentXY)
@@ -135,7 +134,7 @@ def clusts(currXY):
         dists = []
         for j in range(len(combo)):
             dists.append(distance.euclidean(combo[j], center))
-        currSpreads.append(sum(dists) / float(len(dists)))
+        currSpreads.append(sum(dists) / float(len(dists))) #normalize
 
     variables.clusters.append(currClusters)
     variables.bounds.append(currBounds)

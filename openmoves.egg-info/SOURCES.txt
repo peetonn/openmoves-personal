@@ -12,6 +12,7 @@ openmoves.egg-info/requires.txt
 openmoves.egg-info/top_level.txt
 openmoves/commands/__init__.py
 openmoves/commands/base.py
+openmoves/commands/patterns.py
 openmoves/commands/readin.py
 openmoves/commands/record.py
 openmoves/commands/sample.py
@@ -23,4 +24,5 @@ openmoves/commands/library/supervised.py
 openmoves/commands/library/track.py
 openmoves/commands/library/unsupervised.py
 openmoves/commands/library/variables.py
+openmoves/commands/library/variables2.py
 openmoves/commands/library/visualization.py

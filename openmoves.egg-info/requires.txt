@@ -1,1 +1,9 @@
 docopt
+shapely
+descartes
+matplotlib
+numpy
+sklearn
+scipy
+cython
+fastdtw

@@ -58,17 +58,15 @@ class Readin(Base):
                     continue
                 
                 tracks = trackingData['people_tracks']
-                if tracks == []:
-                    continue
-
-                #print(maxx, maxy, minx, miny)
-                #(4.79668, 5.13825, -3.98568, -3.31501)
 
                 trackData = []
                 for singletrack in tracks:
                     if singletrack['x'] < -3.98568 or singletrack['x'] > 4.79668 or singletrack['y'] < -3.31501 or singletrack['y'] > 5.13825:
                         continue
                     trackData.append([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
+
+                if trackData == []:
+                    continue
 
                 #create/update list of IDs
                 allids = [singletrack[0] for singletrack in trackData]
@@ -108,7 +106,7 @@ class Readin(Base):
                 
                 currX = [point[0] for point in trackData]
                 currY = [point[1] for point in trackData]
-
+                
                 currXY = []
                 for x in range(len(trackData)):
                     currXY.append([currX[x], currY[x]])
