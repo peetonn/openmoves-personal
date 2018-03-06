@@ -61,8 +61,9 @@ class Readin(Base):
 
                 trackData = []
                 for singletrack in tracks:
-                        if singletrack['x'] < variables.extents[0][0] or singletrack['x'] > variables.extents[1][0] or singletrack['y'] < variables.extents[0][1] or singletrack['y'] > variables.extents[1][1]: 
-                            continue
+                    if singletrack['x'] < variables.extents[0][0] or singletrack['x'] > variables.extents[1][0] or singletrack['y'] < variables.extents[0][1] or singletrack['y'] > variables.extents[1][1]: 
+                        continue
+                    print([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
                     trackData.append([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
 
                 if trackData == []:
@@ -108,8 +109,12 @@ class Readin(Base):
                 currY = [point[1] for point in trackData]
                 
                 currXY = []
+                dists = []
                 for x in range(len(trackData)):
                     currXY.append([currX[x], currY[x]])
+                    dists.append(instantaneous.linedists(currXY[-1]))
+                
+                variables.stagedists.append(dists)
 
                 unsupervised.clusts(currXY)
                 unsupervised.hotClusts()

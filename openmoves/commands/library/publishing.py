@@ -18,6 +18,7 @@ def parse():
     variables.pcarefresh = data["unsupervised"]["pcarefresh"]
     variables.extents = data["instantaneous"]["extents"]
     variables2.extents = data["instantaneous"]["extents"]
+    variables.stagedirs = data["instantaneous"]["stagedirs"]
 
 
 def packet():
@@ -49,7 +50,7 @@ def packet():
     clusters = variables.clusters[-1]
     spreads = variables.spreads[-1]
     return {"header":header, "firstdirs":firstdirs, "seconddirs":seconddirs, "pairwise":pairs,  
-        "clusters":clusters, "clustercenters":centers, "spreads":spreads, "stagedist"[1,2,3,4,5], "templates":[[1,2,3,4][1,2,3,4],[1,2,3,4]]} 
+        "clusters":clusters, "clustercenters":centers, "spreads":spreads, "stagedists":variables.stagedists[-1], "templates":[[1,2,3,4],[1,2,3,4],[1,2,3,4]]} 
 
 def secondPacket():
     now = float(time.time())

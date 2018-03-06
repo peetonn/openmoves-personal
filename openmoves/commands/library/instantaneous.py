@@ -12,7 +12,7 @@ def pointdists(point):
     return distances
 
 def linedists(point):
-    distances = []
+    distances = {}
     pt = geometry.Point(point[0], point[1])
     for i in range(len(variables.stagepts)):
         a = variables.stagepts[i]
@@ -20,15 +20,16 @@ def linedists(point):
             b = variables.stagepts[0]
         else:
             b = variables.stagepts[i+1]
-        topLeft = geometry.Point(min(a[0], b[0]), min(a[1], b[1]))
-        bottomRight = geometry.Point(max(a[0], b[0]), max(a[1], b[1]))
-        box = geometry.box(min(topLeft.x - buffer, bottomRight.x + buffer), min(topLeft.y - buffer, bottomRight.y + buffer), 
-            max(topLeft.x - buffer, bottomRight.x + buffer), max(topLeft.y - buffer, bottomRight.y + buffer))
-        if box.contains(pt):
+        #the following lines would bound the point to fall within the endpts of the line
+        #topLeft = geometry.Point(min(a[0], b[0]), min(a[1], b[1]))
+        #bottomRight = geometry.Point(max(a[0], b[0]), max(a[1], b[1]))
+        #box = geometry.box(min(topLeft.x - 5, bottomRight.x + 5), min(topLeft.y - 5, bottomRight.y + 5), 
+        #    max(topLeft.x - 5, bottomRight.x + 5), max(topLeft.y - 5, bottomRight.y + 5))
+        #if box.contains(pt):
             #d = |v-dot-r| = |(x2 - x1)(y1 - y0) - (x1 - x0)(y2 - y1)| / sqrt((x2 - x1)^2 + (y2 - y1)^2)
             #where *2 and *1 are endpts of line, *0 is point being checked
-            up = abs(((a[0] - b[0]) * (b[1] - point[1])) - ((b[0] - point[0]) * (a[1] - b[1])))
-            distances.append(up / math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2))
+        up = abs(((a[0] - b[0]) * (b[1] - point[1])) - ((b[0] - point[0]) * (a[1] - b[1])))
+        distances[variables.stagedirs[i]] = round(up / math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2), 3)
     return distances
 
 def orientation(idx):

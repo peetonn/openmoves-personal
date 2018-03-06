@@ -19,6 +19,7 @@ parentList = []
 pois = None
 stagepts = None
 extents = None
+stagedirs = None
 
 pairs = []
 xdersList = []
@@ -26,6 +27,7 @@ ydersList = []
 xseconddersList = []
 yseconddersList = []
 orientations = []
+stagedists = []
 
 #for plotting
 allX = []
