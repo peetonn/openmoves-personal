@@ -28,6 +28,7 @@ xseconddersList = []
 yseconddersList = []
 orientations = []
 stagedists = []
+speeds = []
 
 #for plotting
 allX = []
@@ -65,3 +66,5 @@ x_path = []
 y_path = []
 z_path = []
 l_path = []
+
+predictions = []

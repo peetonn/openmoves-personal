@@ -18,6 +18,7 @@ parentList = []
 pois = None
 stagepts = None
 extents = None
+stagedirs = None
 
 pairs = []
 xdersList = []
@@ -25,6 +26,7 @@ ydersList = []
 xseconddersList = []
 yseconddersList = []
 orientations = []
+speeds = []
 
 #for plotting
 allX = []
@@ -62,3 +64,5 @@ x_path = []
 y_path = []
 z_path = []
 l_path = []
+
+predictions = []

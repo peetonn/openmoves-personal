@@ -63,7 +63,7 @@ class Readin(Base):
                 for singletrack in tracks:
                     if singletrack['x'] < variables.extents[0][0] or singletrack['x'] > variables.extents[1][0] or singletrack['y'] < variables.extents[0][1] or singletrack['y'] > variables.extents[1][1]: 
                         continue
-                    print([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
+                    #print([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
                     trackData.append([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
 
                 if trackData == []:
@@ -82,6 +82,7 @@ class Readin(Base):
                         variables.yseconddersList.append([float('nan')] * variables.epoch)
                         variables.orientations.append([float('nan')] * variables.epoch)
                         variables.dtwdistances.append([])
+                        variables.speeds.append([])
                 
                     #append each track to appropriate list
                     childList = []
@@ -104,6 +105,7 @@ class Readin(Base):
                         variables.xseconddersList[idx].append(float('nan'))
                         variables.yseconddersList[idx].append(float('nan'))
                         variables.orientations[idx].append(float('nan'))
+                        variables.speeds.append([])
                 
                 currX = [point[0] for point in trackData]
                 currY = [point[1] for point in trackData]
@@ -146,9 +148,9 @@ class Readin(Base):
                         #doneids.append(singleID)
                 """
                 
-                if variables.visualize == 1:
-                    variables.allX.append(currX)
-                    variables.allY.append(currY)
+                #if variables.visualize == 1:
+                variables.allX.append(currX)
+                variables.allY.append(currY)
                 
                 variables.epoch += 1
 

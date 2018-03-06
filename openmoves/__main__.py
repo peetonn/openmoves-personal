@@ -1,2 +1,2 @@
-from .cli import main
+from openmoves.cli import main
 main()

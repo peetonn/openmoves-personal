@@ -82,8 +82,9 @@ def hotClusts(): #need to remove duplicates
 
         variables.hotSpots = []
         for i in range(nClusts):
-            variables.hotSpots.append(recentXY[clusterCenters[i]])
-
+            if recentXY[clusterCenters[i]] not in variables.hotSpots:
+                variables.hotSpots.append(recentXY[clusterCenters[i]])
+                
 def clusts(currXY):
     #get clusters
     af = AffinityPropagation().fit(currXY)

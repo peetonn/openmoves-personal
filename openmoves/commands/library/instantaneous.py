@@ -56,10 +56,11 @@ def ders(idx, childList):
         x = childList[0]
         y = childList[1]
         prevpoint = variables.parentList[idx][len(variables.parentList[idx])-2]
-        variables.xdersList[idx].append((x-prevpoint[0])/variables.PERIOD)
-        variables.ydersList[idx].append((y-prevpoint[1])/variables.PERIOD)
+        variables.xdersList[idx].append(round((x-prevpoint[0])/variables.PERIOD, 4))
+        variables.ydersList[idx].append(round((y-prevpoint[1])/variables.PERIOD, 4))
+        variables.speeds[idx].append(math.sqrt(variables.xdersList[idx][-1]**2 + variables.ydersList[idx][-1]**2))
         if len(variables.parentList[idx]) > 3 and variables.xdersList[idx][-2] != float('nan'):
-            variables.xseconddersList[idx].append(((variables.xdersList[idx][-1] - \
-                variables.xdersList[idx][-2])/variables.PERIOD))
-            variables.yseconddersList[idx].append(((variables.ydersList[idx][-1] - \
-                variables.ydersList[idx][-2])/variables.PERIOD))
+            variables.xseconddersList[idx].append(round(((variables.xdersList[idx][-1] - \
+                variables.xdersList[idx][-2])/variables.PERIOD), 4))
+            variables.yseconddersList[idx].append(round(((variables.ydersList[idx][-1] - \
+                variables.ydersList[idx][-2])/variables.PERIOD), 4))
