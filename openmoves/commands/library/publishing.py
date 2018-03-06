@@ -35,11 +35,12 @@ def packet():
 
     firstdirs = []
     seconddirs = []
-    for i in range(len(variables.ids)):
-        if len(variables.xdersList[i]) == variables.epoch-2 and variables.epoch > 2:
-            firstdirs.append([variables.xdersList[i][-1], variables.ydersList[i][-1]])
-        if len(variables.xdersList[i]) == variables.epoch-2 and variables.epoch > 3:
-            seconddirs.append([variables.xseconddersList[i][-1], variables.yseconddersList[i][-1]])
+    for cur in variables.aliveIDs:
+        idx = variables.ids.index(cur)
+        if len(variables.xdersList[idx]) > 2 and variables.epoch > 2:
+            firstdirs.append([variables.xdersList[idx][-1], variables.ydersList[idx][-1]])
+        if len(variables.xdersList[idx]) > 3 and variables.epoch > 3:
+            seconddirs.append([variables.xseconddersList[idx][-1], variables.yseconddersList[idx][-1]])
     pairs = variables.pairs[-1]
     centers = variables.centers[-1]
     clusters = variables.clusters[-1]
@@ -52,5 +53,5 @@ def secondPacket():
     sec = int(now)
     nsec = int((now-sec) * 1e9)
     header = {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}
-    return {"seq":variables.SEQ, "dtwdistances":variables.dtwdistances, "idorder": variables.ids, "hotspots":list(set(variables.hotSpots)), "alive_IDs": variables.aliveIDs}
+    return {"seq":variables.SEQ, "dtwdistances":variables.dtwdistances, "idorder": variables.ids, "aliveIDs":variables.aliveIDs, "hotspots":variables.hotSpots}#list(set(variables.hotSpots))}
     #"pca1":variables.e1, "pca2":variables.e2, 
