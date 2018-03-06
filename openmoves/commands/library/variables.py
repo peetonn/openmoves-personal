@@ -18,6 +18,7 @@ parentList = []
 
 pois = None
 stagepts = None
+extents = None
 
 pairs = []
 xdersList = []

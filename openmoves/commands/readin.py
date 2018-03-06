@@ -61,8 +61,8 @@ class Readin(Base):
 
                 trackData = []
                 for singletrack in tracks:
-                    if singletrack['x'] < -3.98568 or singletrack['x'] > 4.79668 or singletrack['y'] < -3.31501 or singletrack['y'] > 5.13825:
-                        continue
+                        if singletrack['x'] < variables.extents[0][0] or singletrack['x'] > variables.extents[1][0] or singletrack['y'] < variables.extents[0][1] or singletrack['y'] > variables.extents[1][1]: 
+                            continue
                     trackData.append([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
 
                 if trackData == []:

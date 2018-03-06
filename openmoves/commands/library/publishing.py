@@ -1,4 +1,4 @@
-import variables, time, json, os 
+import variables, variables2, time, json, os 
 
 def parse():
     """function to parse the config file"""
@@ -16,6 +16,9 @@ def parse():
     variables.shortclusterwindow = data["unsupervised"]["shortclusterwindowsize"]
     variables.hotspotwindow = data["unsupervised"]["hotspotwindowsize"]
     variables.pcarefresh = data["unsupervised"]["pcarefresh"]
+    variables.extents = data["instantaneous"]["extents"]
+    variables2.extents = data["instantaneous"]["extents"]
+
 
 def packet():
     """
@@ -46,7 +49,7 @@ def packet():
     clusters = variables.clusters[-1]
     spreads = variables.spreads[-1]
     return {"header":header, "firstdirs":firstdirs, "seconddirs":seconddirs, "pairwise":pairs,  
-        "clusters":clusters, "clustercenters":centers, "spreads":spreads} 
+        "clusters":clusters, "clustercenters":centers, "spreads":spreads, "stagedist"[1,2,3,4,5], "templates":[[1,2,3,4][1,2,3,4],[1,2,3,4]]} 
 
 def secondPacket():
     now = float(time.time())
@@ -54,5 +57,4 @@ def secondPacket():
     nsec = int((now-sec) * 1e9)
 
     header = {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}
-    return {"seq":variables.SEQ, "dtwdistances":variables.dtwdistances, "idorder": variables.ids, "aliveIDs":variables.aliveIDs, "hotspots":variables.hotSpots}#list(set(variables.hotSpots))}
-    #"pca1":variables.e1, "pca2":variables.e2, 
+    return {"seq":variables.SEQ, "dtwdistances":[], "idorder": variables.ids, "aliveIDs":variables.aliveIDs, "hotspots":[[1,2,3], [1,2,3], [1,2,3]], "pca1":[1,[1,2,3]], "pca2":[1,[1,2,3]]}

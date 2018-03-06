@@ -45,12 +45,9 @@ class Patterns(Base):
                 if tracks == []:
                     continue
 
-                #print(maxx, maxy, minx, miny)
-                #(4.79668, 5.13825, -3.98568, -3.31501)
-
                 trackData = []
                 for singletrack in tracks:
-                    if singletrack['x'] < -3.7 or singletrack['x'] > 4.5 or singletrack['y'] < -3.1 or singletrack['y'] > 4.9:
+                    if singletrack['x'] < variables2.extents[0][0] or singletrack['x'] > variables2.extents[1][0] or singletrack['y'] < variables2.extents[0][1] or singletrack['y'] > variables2.extents[1][1]:
                         continue
                     trackData.append([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
 

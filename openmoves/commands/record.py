@@ -57,9 +57,8 @@ class Record(Base):
 
                 trackData = []
                 for singletrack in tracks:
-                    if singletrack['x'] < -3.7 or singletrack['x'] > 4.5 or singletrack['y'] < -3.1 or singletrack['y'] > 4.9:
+                    if singletrack['x'] < variables.extents[0][0] or singletrack['x'] > variables.extents[1][0] or singletrack['y'] < variables.extents[0][1] or singletrack['y'] > variables.extents[1][1]:
                         continue
-                    print([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
                     trackData.append([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
                 
                 self.x.append(trackData[0][1])
