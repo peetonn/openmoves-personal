@@ -1,4 +1,4 @@
-import variables, variables2, time, json, os 
+import variables, variables2, time, json, os, scipy.signal 
 
 def parse():
     """function to parse the config file"""
@@ -40,19 +40,23 @@ def packet():
     firstdirs = []
     seconddirs = []
     speeds = []
+    accel = []
     for cur in variables.aliveIDs:
         idx = variables.ids.index(cur)
-        if len(variables.xdersList[idx]) > 2 and variables.epoch > 2:
+        if len(variables.parentList[idx]) > 2 and variables.xdersList[idx][-1] is not None:
             firstdirs.append([variables.xdersList[idx][-1], variables.ydersList[idx][-1]])
             speeds.append(variables.speeds[idx][-1])
-        if len(variables.xdersList[idx]) > 3 and variables.epoch > 3:
+        if len(variables.parentList[idx]) > 3 and variables.xdersList[idx][-1] is not None:
             seconddirs.append([variables.xseconddersList[idx][-1], variables.yseconddersList[idx][-1]])
+            accel.append(variables.accel[idx][-1])
+    #print(speeds)
+    #speeds = scipy.signal.medfilt(speeds)
     pairs = variables.pairs[-1]
     centers = variables.centers[-1]
     clusters = variables.clusters[-1]
     spreads = variables.spreads[-1]
-    return {"header":header, "firstdirs":firstdirs, "seconddirs":seconddirs, "speeds": speeds, "pairwise":pairs,  
-        "clusters":clusters, "clustercenters":centers, "spreads":spreads, "stagedists":variables.stagedists[-1], "templates":[[1,2,3,4],[1,2,3,4],[1,2,3,4]]} 
+    return {"header":header, "epoch": variables.epoch, "firstdirs":firstdirs, "seconddirs":seconddirs, "speeds": speeds, "accel":accel, "pairwise":pairs,  
+        "clusters":clusters, "clustercenters":centers, "spreads":spreads, "stagedists":variables.stagedists[-1]} 
 
 def secondPacket():
     now = float(time.time())
@@ -60,4 +64,7 @@ def secondPacket():
     nsec = int((now-sec) * 1e9)
     hots = []
     header = {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}
-    return {"seq":variables.SEQ, "dtwdistances":[], "idorder": variables.ids, "aliveIDs":variables.aliveIDs, "hotspots":variables.hotSpots, "pca1":[1,[1,2,3]], "pca2":[1,[1,2,3]]}
+    return {"seq":variables.SEQ, "dtwdistances":[], "idorder": variables.ids, "aliveIDs":variables.aliveIDs, "hotspots":variables.hotSpots[:15], "pca1":[1,[1,2,3]], "pca2":[1,[1,2,3]]}
+
+def patternPacket():
+    return {"predictions": variables2.predictions}

@@ -29,6 +29,7 @@ yseconddersList = []
 orientations = []
 stagedists = []
 speeds = []
+accel = []
 
 #for plotting
 allX = []

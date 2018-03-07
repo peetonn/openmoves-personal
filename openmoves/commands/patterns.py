@@ -21,6 +21,9 @@ class Patterns(Base):
         s_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         #s_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+        s_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s_out.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST,1)
+
         supervised.readin("path")
 
         s_in.bind(("", 21234))
@@ -28,6 +31,7 @@ class Patterns(Base):
         
         try:
             while True:
+                variables2.predictions = []
                 data, addr = s_in.recvfrom(8192)
                 data = data.rstrip("\0")  
                 payload = json.dumps(json.loads(data), sort_keys=True, indent=4, separators=(',', ': ') ) 
@@ -94,9 +98,13 @@ class Patterns(Base):
                         idx = self.ids.index(singleID)
                         path = self.parentList[idx]
                         #print("enter predict")
-                        supervised.predict(path, singleID)
+                        variables2.predictions.append(supervised.predict(path, singleID))
 
                 epoch = epoch + 1
+
+                MESSAGE = json.dumps(publishing.patternpacket())
+                payload = bytes(MESSAGE.encode('utf-8')) + bytes(bytearray(100))
+                s_out.sendto(payload, (variables2.UDP_IP, variables2.UDP_PORT_OUT))
         
         except KeyboardInterrupt:
             pass 

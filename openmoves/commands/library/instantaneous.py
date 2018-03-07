@@ -1,5 +1,6 @@
 import variables
 import numpy as np
+import scipy.signal as sig
 import math
 import shapely.geometry as geometry
 
@@ -52,15 +53,37 @@ def pairwise(X, Y):
     return tempPairs
 
 def ders(idx, childList):
-    if len(variables.parentList[idx]) > 2:
-        x = childList[0]
-        y = childList[1]
-        prevpoint = variables.parentList[idx][len(variables.parentList[idx])-2]
-        variables.xdersList[idx].append(round((x-prevpoint[0])/variables.PERIOD, 4))
-        variables.ydersList[idx].append(round((y-prevpoint[1])/variables.PERIOD, 4))
-        variables.speeds[idx].append(math.sqrt(variables.xdersList[idx][-1]**2 + variables.ydersList[idx][-1]**2))
-        if len(variables.parentList[idx]) > 3 and variables.xdersList[idx][-2] != float('nan'):
-            variables.xseconddersList[idx].append(round(((variables.xdersList[idx][-1] - \
-                variables.xdersList[idx][-2])/variables.PERIOD), 4))
-            variables.yseconddersList[idx].append(round(((variables.ydersList[idx][-1] - \
-                variables.ydersList[idx][-2])/variables.PERIOD), 4))
+    parlist = variables.parentList[idx]
+    """if len(parlist) > 1:
+        xs = []
+        ys = []
+        for x in parlist:
+            xs.append(x[0])
+            ys.append(x[1])
+
+        xfilt = sig.medfilt(xs)
+        yfilt = sig.medfilt(ys)
+
+        parlist = []
+        for i in range(len(xfilt)): 
+            parlist.append([xfilt[i],yfilt[i]])
+            """
+    
+
+    if len(parlist) > 2 and parlist[-1] is not None:
+        x = parlist[-1][0]
+        y = parlist[-1][1]
+ 
+        #x = childList[0]
+        #y = childList[1]
+        prevpoint = parlist[-2]
+
+        variables.xdersList[idx].append((x-prevpoint[0])/variables.PERIOD)
+        variables.ydersList[idx].append((y-prevpoint[1])/variables.PERIOD)
+        variables.speeds[idx].append(math.sqrt(float(variables.xdersList[idx][-1])**2 + float(variables.ydersList[idx][-1])**2))
+        if len(variables.parentList[idx]) > 3 and variables.xdersList[idx][-2] is not None:
+            variables.xseconddersList[idx].append(((variables.xdersList[idx][-1] - \
+                variables.xdersList[idx][-2])/variables.PERIOD))
+            variables.yseconddersList[idx].append(((variables.ydersList[idx][-1] - \
+                variables.ydersList[idx][-2])/variables.PERIOD))
+            variables.accel[idx].append(math.sqrt(float(variables.xseconddersList[idx][-1])**2 + float(variables.yseconddersList[idx][-1])**2))

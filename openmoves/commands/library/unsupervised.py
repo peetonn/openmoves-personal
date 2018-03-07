@@ -46,8 +46,21 @@ def pca():
     #xcov, ycov = covarianceind()
     #ex, vx = np.linalg.eig(xcov)
     #ey, vy = np.linalg.eig(ycov)
+    #print(variables.parentList)
+    #print("-------***-------")
+    #print("***-----------------***")
+    #print(variables.parentList)
+    #parlist = filter(None, variables.parentList)
+    #print("--------------------------")
+    #print(parlist)
+
+    #parlist = np.asarray(parlist)
+    #parlist = parlist[np.logical_not(np.isnan(parlist))]
+    print(variables.parentList)
     print(np.asarray(variables.parentList))
-    covs = np.cov(np.asarray(variables.parentList).T)
+    covs = np.cov(np.asarray(variables.parentList)[0].T)
+    print("---------------------------")
+    print(covs)
     ea, va = np.linalg.eig(covs)
 
     #pair and sort the eigenvectors with respective eigenvalues
@@ -66,10 +79,10 @@ def hotClusts(): #need to remove duplicates
     if(len(variables.allX) > variables.hotspotwindow):
         recentXY = []
         for i in range(1, variables.hotspotwindow):
-            currentX = variables.allX[len(variables.allX)-i]
-            currentY = variables.allY[len(variables.allX)-i]
+            currentX = variables.allX[-i]
+            currentY = variables.allY[-i]
             for j in range(len(currentX)):
-                if currentX[j] != float('nan') and currentY[j] != float('nan'):
+                #if currentX[j] != float('nan') and currentY[j] != float('nan'):
                     recentXY.append([currentX[j], currentY[j]])
 
         af = AffinityPropagation().fit(recentXY)
@@ -79,12 +92,13 @@ def hotClusts(): #need to remove duplicates
             nClusts = 0
         else:
             nClusts = len(clusterCenters)
-
+        print(nClusts)
         variables.hotSpots = []
         for i in range(nClusts):
             if recentXY[clusterCenters[i]] not in variables.hotSpots:
-                variables.hotSpots.append(recentXY[clusterCenters[i]])
                 
+                variables.hotSpots.append(recentXY[clusterCenters[i]])
+
 def clusts(currXY):
     #get clusters
     af = AffinityPropagation().fit(currXY)

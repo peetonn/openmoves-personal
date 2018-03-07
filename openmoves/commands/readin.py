@@ -33,7 +33,6 @@ class Readin(Base):
         s_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s_out.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST,1)
 
-
         s_in.bind(("", variables.UDP_PORT_IN))
         print("waiting on port:", variables.UDP_PORT_IN)
 
@@ -61,6 +60,7 @@ class Readin(Base):
 
                 trackData = []
                 for singletrack in tracks:
+                    #[-3.7, -3.1], [4.5, 4.9]
                     if singletrack['x'] < variables.extents[0][0] or singletrack['x'] > variables.extents[1][0] or singletrack['y'] < variables.extents[0][1] or singletrack['y'] > variables.extents[1][1]: 
                         continue
                     #print([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
@@ -75,14 +75,15 @@ class Readin(Base):
                 for singleID in allids:
                     if singleID not in variables.ids:
                         variables.ids.append(singleID)
-                        variables.parentList.append([[float('nan'), float('nan')]] * variables.epoch)
-                        variables.xdersList.append([float('nan')] * variables.epoch)
-                        variables.ydersList.append([float('nan')] * variables.epoch)
-                        variables.xseconddersList.append([float('nan')] * variables.epoch)
-                        variables.yseconddersList.append([float('nan')] * variables.epoch)
-                        variables.orientations.append([float('nan')] * variables.epoch)
+                        variables.parentList.append([])#[[None, None]] * variables.epoch)
+                        variables.xdersList.append([])#[None] * variables.epoch)
+                        variables.ydersList.append([])#[None] * variables.epoch)
+                        variables.xseconddersList.append([])#[None] * variables.epoch)
+                        variables.yseconddersList.append([])#[None] * variables.epoch)
+                        variables.orientations.append([])#[None] * variables.epoch)
                         variables.dtwdistances.append([])
                         variables.speeds.append([])
+                        variables.accel.append([])
                 
                     #append each track to appropriate list
                     childList = []
@@ -96,16 +97,17 @@ class Readin(Base):
 
                     instantaneous.ders(idx, childList)                    
                
-                for singleID in variables.ids:
+                """for singleID in variables.ids:
                     if singleID not in allids:
                         idx = variables.ids.index(singleID)
-                        variables.parentList[idx].append([float('nan'), float('nan')])
-                        variables.xdersList[idx].append(float('nan'))
-                        variables.ydersList[idx].append(float('nan'))
-                        variables.xseconddersList[idx].append(float('nan'))
-                        variables.yseconddersList[idx].append(float('nan'))
-                        variables.orientations[idx].append(float('nan'))
+                        variables.parentList[idx].append([None, None])
+                        variables.xdersList[idx].append(None)
+                        variables.ydersList[idx].append(None)
+                        variables.xseconddersList[idx].append(None)
+                        variables.yseconddersList[idx].append(None)
+                        variables.orientations[idx].append(None)
                         variables.speeds.append([])
+                        """
                 
                 currX = [point[0] for point in trackData]
                 currY = [point[1] for point in trackData]
@@ -153,8 +155,8 @@ class Readin(Base):
                 variables.allY.append(currY)
                 
                 variables.epoch += 1
-
-                """if variables.epoch % variables.pcarefresh == 0 and aliveids > 1:
+                """
+                if variables.epoch % variables.pcarefresh == 0 and aliveids > 0:
                     #results ordered as: x1, y1, x2, y1,..., xn, yn
                     variables.e1 = []
                     variables.e2 = []
@@ -164,8 +166,9 @@ class Readin(Base):
                     e1[1] = e1[1].tolist()
                     e2[1] = e2[1].tolist()
                     variables.e1.append(e1)
-                    variables.e1.append(e2)"""
-
+                    variables.e1.append(e2)
+                    """
+                
                 MESSAGE = json.dumps(publishing.packet())
                 payload = bytes(MESSAGE.encode('utf-8')) + bytes(bytearray(100))
                 s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))

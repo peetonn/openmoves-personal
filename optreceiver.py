@@ -3,7 +3,7 @@
 # jburke@ucla.edu 
 
 import socket, json
-port = 21235
+port = 21234
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.bind(("", port))
 print "waiting on port:", port
