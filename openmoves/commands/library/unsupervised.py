@@ -92,7 +92,6 @@ def hotClusts(): #need to remove duplicates
             nClusts = 0
         else:
             nClusts = len(clusterCenters)
-        print(nClusts)
         variables.hotSpots = []
         for i in range(nClusts):
             if recentXY[clusterCenters[i]] not in variables.hotSpots:
