@@ -3,17 +3,21 @@ import variables
 class Track:
     """Proposed class for storing all data related to one track"""
 
-    def __init__(self, track, sigid):
+    def __init__(self, track, sigid, epoch):
         self.id = sigid
-        paddedList = [[float('inf'), float('inf'), float('inf')]] * variables.epoch
-        self.track = paddedList.append(track)
-        self.xders = [[float('inf'), float('inf'), float('inf')]] * variables.epoch
-        self.yders = [[float('inf'), float('inf'), float('inf')]] * variables.epoch
-        self.xsecondders = [[float('inf'), float('inf'), float('inf')]] * variables.epoch
-        self.ysecondders = [[float('inf'), float('inf'), float('inf')]] * variables.epoch
-        self.distances = [[float('inf')]] * variables.epoch
-        #self.stagedists = [[float('inf')]] * variables.epoch
+        self.track = [track]
 
+        self.xders = []
+        self.yders = []
+        
+        self.xsecondders = []
+        self.ysecondders = []
+        
+        self.distances = []
+        self.stagedists = []
+
+        self.born = epoch
+        self.died = float('inf')
 
 
     

@@ -2,6 +2,7 @@
 import socket, time, json, random, csv
 import numpy as np
 import library.variables as variables
+import library.publishing as publishing
 
 from .base import Base
 
@@ -16,6 +17,8 @@ class Record(Base):
         self.y = []
         self.z = []
 
+        publishing.parse()
+
     def run(self):
         s_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -23,10 +26,10 @@ class Record(Base):
         print("waiting on port:", variables.UDP_PORT_IN)
 
         if self.ops["--path"] == True:
-            x_path_file = open('library/data/paths_x.csv', 'ab')
-            y_path_file = open('library/data/paths_y.csv', 'ab')
-            z_path_file = open('library/data/paths_z.csv', 'ab')
-            label_file = open('library/data/paths_l.txt', 'ab')
+            x_path_file = open('openmoves/commands/library/data/paths_x.csv', 'ab')
+            y_path_file = open('openmoves/commands/library/data/paths_y.csv', 'ab')
+            z_path_file = open('openmoves/commands/library/data/paths_z.csv', 'ab')
+            label_file = open('openmoves/commands/library/data/paths_l.txt', 'ab')
 
         if self.ops["--layout"] == True:
             x_layout_file = open('library/data/layouts_x.csv', 'ab')
@@ -61,6 +64,8 @@ class Record(Base):
                         continue
                     trackData.append([singletrack['id'], singletrack['x'], singletrack['y'], singletrack['height']])
                 
+                if trackData == []:
+                    continue
                 self.x.append(trackData[0][1])
                 self.y.append(trackData[0][2])
                 self.z.append(trackData[0][3])

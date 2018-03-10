@@ -4,10 +4,10 @@ from scipy.stats.mstats import zscore
 
 def readin(t):
     if t == "path":
-        x_path_file = open('library/data/paths_x.csv', 'r')
-        y_path_file = open('library/data/paths_y.csv', 'r')
-        z_path_file = open('library/data/paths_z.csv', 'r')
-        label_file = open('library/data/paths_l.txt', 'r')
+        x_path_file = open('openmoves/commands/library/data/paths_x.csv', 'r')
+        y_path_file = open('openmoves/commands/library/data/paths_y.csv', 'r')
+        z_path_file = open('openmoves/commands/library/data/paths_z.csv', 'r')
+        label_file = open('openmoves/commands/library/data/paths_l.txt', 'r')
         
         reader = csv.reader(x_path_file, quoting=csv.QUOTE_NONNUMERIC)
         variables2.x_path = list(reader)
@@ -52,7 +52,7 @@ def predict(test, singleID):
     #for i in enumerate(test):
     mindist = float('inf')
     closest = []
-    for i in range(len(variables2.x_path)): #, j, l in variables2.x_path, variables2.y_path, variables2.l_path:
+    for i in range(len(variables2.l_path)): #, j, l in variables2.x_path, variables2.y_path, variables2.l_path:
         comp = []
         for k in range(len(variables2.x_path[i])):
             comp.append([variables2.x_path[i][k], variables2.y_path[i][k]])
@@ -70,18 +70,33 @@ def predict(test, singleID):
         test2 = shorttime.makerotationinvariant(test2)
         test2 = shorttime.iterativeNormalization(test2)
         test2 = shorttime.interpolate(test2)
+        
+        """
+        test2x = []
+        test2y = []
+        for j in range(len(test2)):
+            test2x.append(test2[j][0])
+            test2y.append(test2[j][1])
+
+        compx = []
+        compy = []
+        for l in range(len(comp)):
+            compx.append(comp[l][0])
+            compy.append(comp[l][1])
+        """
 
         if lbkeogh(test2, comp, 5) < mindist:
-            dist, blah = fastdtw.fastdtw(test2, comp, dist=shorttime.dist)
+            dist, blah = fastdtw.fastdtw(test2, comp, radius=25, dist=shorttime.dist)
             if dist < mindist:
                 mindist = dist
                 normdist = float(len(test2)*math.pi - mindist) / (len(test2)*math.pi) 
-                closest.append([variables2.l_path[i], mindist, normdist, singleID])
+                closest = [variables2.l_path[i], mindist, normdist, singleID]# .append([variables2.l_path[i], mindist, normdist, singleID])
     
-    if closest != []:
-        print("---------")
+    if closest != []:       
         predictions.append(closest)
-        print(predictions)
+    
+    print("---------")
+    print(predictions)
     return predictions
 
 def lbkeogh(p1, p2, r):

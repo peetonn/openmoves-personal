@@ -1,6 +1,8 @@
 import socket, time, json, random, fastdtw
 import library.shorttime as shorttime
 import library.supervised as supervised
+import library.variables2 as variables2
+import library.publishing as publishing
 
 from .base import Base
 
@@ -14,6 +16,9 @@ class Patterns(Base):
         self.ids = []
         self.parentList = []
         self.dtwdistances = []
+
+        publishing.parse()
+
 
     def run(self):
         epoch = 0
@@ -97,13 +102,12 @@ class Patterns(Base):
                     for singleID in allids:
                         idx = self.ids.index(singleID)
                         path = self.parentList[idx]
-                        #print("enter predict")
                         variables2.predictions.append(supervised.predict(path, singleID))
 
                 epoch = epoch + 1
 
-                MESSAGE = json.dumps(publishing.patternpacket())
-                payload = bytes(MESSAGE.encode('utf-8')) + bytes(bytearray(100))
+                MESSAGE = json.dumps(publishing.patternPacket())
+                payload = bytes(MESSAGE.encode('utf-8'))
                 s_out.sendto(payload, (variables2.UDP_IP, variables2.UDP_PORT_OUT))
         
         except KeyboardInterrupt:
