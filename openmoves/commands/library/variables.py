@@ -14,6 +14,8 @@ trackheight = 0
 #instantaneous
 ids = []
 aliveIDs = []
+currIDs = []
+outofbounds = []
 parentList = []
 
 pois = None
@@ -22,6 +24,8 @@ extents = None
 stagedirs = None
 
 pairs = []
+#borntimes = []
+#diedtimes = []
 xdersList = []
 ydersList = []
 xseconddersList = []

@@ -133,7 +133,6 @@ def lbkeogh(p1, p2, r):
     
     return np.sqrt(lbsum)
 
-"""
 def settoorigin(path):
     x0, y0 = path[0]
     return [(x - x0, y - y0) for x, y in path]
@@ -158,10 +157,10 @@ def dtw_d(p1, p2, window):
             dtwdict[(i, j)] = float("inf")#(0, 0, 0)
     dtwdict[(-1, -1)] = 0#(0, 0, 0)
 
-    p1 = settoorigin(p1)
-    p2 = settoorigin(p2)
-    p1 = rotatetox(p1)
-    p2 = rotatetox(p2)
+    #p1 = settoorigin(p1)
+    #p2 = settoorigin(p2)
+    #p1 = rotatetox(p1)
+    #p2 = rotatetox(p2)
 
     #do the dtw
     for i in range(len(p1)):
@@ -171,16 +170,14 @@ def dtw_d(p1, p2, window):
      
                 #key = lambda x: x[0]) #get the min distance with indices appended
             #dtwdict[(i, j)][0] += dist
-
+    """
     #get list indices for warp path
     indices = []
     i, j = len(p1)-1, len(p2)-1
     while not (i == j == 0):
         indices.append((i-1, j-1))
-        print(dtwdict[(i, j)])
-        print(dtwdict[(i, j)][2])
         i, j = dtwdict[(i, j)][1], dtwdict[(i, j)][2]
-    
+    """
     return math.sqrt(dtwdict[len(p1)-1, len(p2)-1]) #, indices.reverse()
 
 def dtw_i(p1, p2, window):
@@ -190,8 +187,8 @@ def dtw_i(p1, p2, window):
 
     p1 = settoorigin(p1)
     p2 = settoorigin(p2)
-    p1 = rotatetox(p1)
-    p2 = rotatetox(p2)
+    #p1 = rotatetox(p1)
+    #p2 = rotatetox(p2)
 
     #do the dtw
     x1 = []
@@ -209,12 +206,12 @@ def dtw_i(p1, p2, window):
     y1 = zscore(y1)
     y2 = zscore(y2)
 
-    xval, idx = fastdtw.dtw(x1, x2)
-    yval, idx = fastdtw.dtw(y1, y2)
+    xval, idx = fastdtw.fastdtw(x1, x2)
+    yval, idx = fastdtw.fastdtw(y1, y2)
 
-    x = dtw_1d(x1, x2, window)
-    y = dtw_1d(y1, y2, window)
-    return x + y
+    #x = dtw_1d(x1, x2, window)
+    #y = dtw_1d(y1, y2, window)
+    return xval + yval
 
 def dtw_1d(p1, p2, window):
     dtwdict = {}
@@ -230,7 +227,7 @@ def dtw_1d(p1, p2, window):
             dtwdict[(i, j)] = dist + min(dtwdict[(i-1, j)], dtwdict[(i, j-1)], dtwdict[(i-1, j-1)])
 		
     return math.sqrt(dtwdict[len(p1) - 1, len(p2) - 1])
-"""
+
 
 #kalman filter, commented heavily for personal reference
 #todo: factor in estimation of acceleration 

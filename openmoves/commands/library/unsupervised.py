@@ -1,6 +1,7 @@
 import variables
 import numpy as np
 from sklearn.cluster import AffinityPropagation
+from sklearn.cluster import MeanShift, estimate_bandwidth
 from scipy import linalg
 from scipy.spatial import distance
 import shapely.geometry as geometry
@@ -74,7 +75,7 @@ def pca():
     #return greatest of each
     return eapairs[0], eapairs[1]
 
-def hotClusts(): #need to remove duplicates
+def hotClusts(): 
     #hot locations analysis on recent time window (can adjust)
     if(len(variables.allX) > variables.hotspotwindow):
         recentXY = []
@@ -82,12 +83,11 @@ def hotClusts(): #need to remove duplicates
             currentX = variables.allX[-i]
             currentY = variables.allY[-i]
             for j in range(len(currentX)):
-                #if currentX[j] != float('nan') and currentY[j] != float('nan'):
                     recentXY.append([currentX[j], currentY[j]])
 
         af = AffinityPropagation().fit(recentXY)
         clusterCenters = af.cluster_centers_indices_
-        #print(clusterCenters)
+
         if clusterCenters is None:
             nClusts = 0
         else:
@@ -95,8 +95,98 @@ def hotClusts(): #need to remove duplicates
         variables.hotSpots = []
         for i in range(nClusts):
             if recentXY[clusterCenters[i]] not in variables.hotSpots:
-                
                 variables.hotSpots.append(recentXY[clusterCenters[i]])
+
+def hotClusts2():
+    #hot locations analysis on recent time window (can adjust)
+    if(len(variables.allX) > variables.hotspotwindow):
+        recentXY = []
+        for i in range(1, variables.hotspotwindow):
+            currentX = variables.allX[-i]
+            currentY = variables.allY[-i]
+            for j in range(len(currentX)):
+                    recentXY.append([currentX[j], currentY[j]])
+        if recentXY == []:
+            return
+        print('-------')
+        print(recentXY)
+        af = MeanShift(bandwidth=1, bin_seeding=True).fit(recentXY)
+        clusterCenters = af.cluster_centers_
+        if clusterCenters is None:
+            nClusts = 0
+        else:
+            nClusts = len(clusterCenters)
+        variables.hotSpots = []
+        for i in range(nClusts):
+            variables.hotSpots.append(clusterCenters[i].tolist())
+        print(variables.hotSpots)
+
+def clusts2(currXY, allids):
+    #get clusters
+    if len(currXY) < 2:
+        variables.numClusts.append(len(currXY))
+        variables.clusters.append(currXY)
+        variables.bounds.append(currXY)
+        variables.spreads.append([0])
+        variables.centers.append(currXY)
+        return
+    #bandwidth = estimate_bandwidth(currXY, n_samples=len(currXY))
+    ms = MeanShift(bandwidth=1, bin_seeding=True)
+    ms.fit(currXY)
+    labels = ms.labels_
+    cluster_centers = ms.cluster_centers_ #_indices_
+    if cluster_centers is None:
+        nClusts = 0
+    else:
+        nClusts = len(cluster_centers)
+    variables.numClusts.append(nClusts)
+    centers = []
+    for i in range(nClusts):
+        centers.append(cluster_centers[i].tolist())
+    variables.centers.append(centers)
+
+    currClusters = []
+    currBounds = []
+    currSpreads = []
+    for k in range(nClusts):
+        classMems = labels == k
+        classMem = []
+        for t in classMems:
+            if isinstance(t, tuple):
+                for x in t:
+                    classMem.append(x)
+            else:
+                classMem.append(t)
+        classMems = np.asarray(classMem)
+        currXY = np.asarray(currXY)
+        center = centers[k]
+
+        #combine points
+        ids = []
+        for j in range(len(classMems)):
+            if classMems[j] == True:
+                ids.append(allids[j])
+        x, y = currXY[classMems, 0], currXY[classMems, 1]
+        combo = [] #push combo to save each cluster at each time step
+        for i in range(len(x)):
+            combo.append((ids[i], x[i], y[i]))
+        currClusters.append(combo)
+
+        #bounds
+        pointColl = geometry.MultiPoint(combo)
+        convHull = pointColl.convex_hull
+        minx, miny, maxx, maxy = convHull.bounds
+        currBounds.append([minx, miny, maxx, maxy])
+
+        #spreads
+        dists = []
+        for j in range(len(combo)):
+            dists.append(distance.euclidean(combo[j][1:2], center))
+        currSpreads.append(sum(dists) / float(len(dists))) #normalize
+
+    variables.clusters.append(currClusters)
+    variables.bounds.append(currBounds)
+    variables.spreads.append(currSpreads)
 
 def clusts(currXY):
     #get clusters

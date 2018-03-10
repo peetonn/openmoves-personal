@@ -34,8 +34,8 @@ def linedists(point):
     return distances
 
 def orientation(idx):
-    if len(variables.xdersList[idx] > 0):
-        variables.orientations[idx].append(np.linalg.norm(variables.xdersList[idx][-1], variables.ydersList[idx][-1]))
+    if len(variables.xdersList[idx]) > 0:
+        variables.orientations[idx].append(np.linalg.norm([variables.xdersList[idx][-1], variables.ydersList[idx][-1]]))
 
 def pairwise(X, Y):
     tempPairs = []
@@ -52,7 +52,7 @@ def pairwise(X, Y):
     
     return tempPairs
 
-def ders(idx, childList):
+def ders(idx):
     parlist = variables.parentList[idx]
     """if len(parlist) > 1:
         xs = []
@@ -67,8 +67,7 @@ def ders(idx, childList):
         parlist = []
         for i in range(len(xfilt)): 
             parlist.append([xfilt[i],yfilt[i]])
-            """
-    
+    """
 
     if len(parlist) > 2 and parlist[-1] is not None:
         x = parlist[-1][0]
