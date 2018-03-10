@@ -41,6 +41,7 @@ def packet():
     seconddirs = []
     speeds = []
     accel = []
+    stagedists = []
 
     for cur in variables.currIDs:
         idx = variables.ids.index(cur)
@@ -50,13 +51,14 @@ def packet():
         if len(variables.parentList[idx]) > 3 and variables.xdersList[idx][-1] is not None:
             seconddirs.append([variables.xseconddersList[idx][-1], variables.yseconddersList[idx][-1]])
             accel.append(variables.accel[idx][-1])
+        stagedists.append(variables.stagedists[idx][-1])
 
     pairs = variables.pairs[-1]
     centers = variables.centers[-1]
     clusters = variables.clusters[-1]
     spreads = variables.spreads[-1]
     return {"header":header, "epoch": variables.epoch, "firstdirs":firstdirs, "seconddirs":seconddirs, "speeds": speeds, "accel":accel, "pairwise":pairs,  
-        "clusters":clusters, "clustercenters":centers, "spreads":spreads, "stagedists":variables.stagedists[-1]} 
+        "clusters":clusters, "clustercenters":centers, "spreads":spreads, "stagedists":stagedists} 
 
 def secondPacket():
     now = float(time.time())
@@ -67,6 +69,8 @@ def secondPacket():
     for cur in variables.currIDs:
         idx = variables.ids.index(cur)
         distances.append(variables.dtwdistances[idx][-1])
+
+    print(distances)
 
     header = {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}
     return {"seq":variables.SEQ, "pathsimilarity":distances, "idorder": variables.currIDs, "aliveIDs":variables.aliveIDs, "hotspots":variables.hotSpots[:15], "pca1":[1,[1,2,3]], "pca2":[1,[1,2,3]]}

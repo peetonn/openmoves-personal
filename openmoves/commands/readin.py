@@ -11,6 +11,7 @@ import library.publishing as publishing
 import library.unsupervised as unsupervised
 import library.visualization as visualize
 import library.shorttime as shorttime
+import library.supervised as supervised
 
 from .base import Base
 
@@ -58,7 +59,7 @@ class Readin(Base):
                     heartbeat = heartbeat + 1
                     variables.aliveIDs = trackingData['alive_IDs']
                     if heartbeat % 2 == 0:
-                        """for singleID in variables.ids:
+                        for singleID in variables.ids:
                             if singleID not in variables.aliveIDs:
                                 idx = variables.ids.index(singleID)
                                 del variables.ids[idx]
@@ -71,7 +72,8 @@ class Readin(Base):
                                 del variables.dtwdistances[idx]
                                 del variables.speeds[idx]
                                 del variables.accel[idx]
-                        """
+                                del variables.predictions[idx]
+                                del variables.stagedists[idx]
                     continue
                 
                 tracks = trackingData['people_tracks']
@@ -95,8 +97,10 @@ class Readin(Base):
                         variables.yseconddersList.append([])
                         variables.orientations.append([])
                         variables.dtwdistances.append([])
+                        variables.stagedists.append([])
                         variables.speeds.append([])
                         variables.accel.append([])
+                        variables.predictions.append([])
                 
                     #append each track to appropriate list
                     childList = []
@@ -144,12 +148,14 @@ class Readin(Base):
                     currXY.append(variables.parentList[idx][-1])
                     currX.append(currXY[-1][0])
                     currY.append(currXY[-1][1])
-                
-                dists = []
-                for j in range(len(currXY)):
-                    dists.append(instantaneous.linedists(currXY[j]))
-                
-                variables.stagedists.append(dists)
+                    variables.stagedists[idx].append(instantaneous.linedists(currXY[-1]))
+                    if currX[-1] < variables.extents[0][0] or currX[-1] > variables.extents[1][0] or currY[-1] < variables.extents[0][1] or currY[-1] > variables.extents[1][1]:
+                        del currXY[-1]
+                        del currX[-1]
+                        del currY[-1]
+
+                variables.allX.append(currX)
+                variables.allY.append(currY)
 
                 unsupervised.clusts2(currXY, variables.currIDs)
                 unsupervised.hotClusts2()
@@ -186,11 +192,6 @@ class Readin(Base):
                         variables.dtwdistances[idx].append(shorttime.doFastDTW(path, otherpath))
                     doneids.append(singleID)
                 
-                #if variables.visualize == 1:
-                variables.allX.append(currX)
-                variables.allY.append(currY)
-                
-                
                 """
                 if variables.epoch % variables.pcarefresh == 0 and aliveids > 0:
                     #results ordered as: x1, y1, x2, y1,..., xn, yn
@@ -205,17 +206,26 @@ class Readin(Base):
                     variables.e1.append(e2)
                     """
                 
+                if variables.epoch % 30 == 0:   
+                    for singleID in variables.currIDs:
+                        idx = variables.ids.index(singleID)
+                        path = variables.parentList[idx]
+                        variables.predictions[idx].append(supervised.predict(path, singleID))
+
                 for sigID in variables.outofbounds:
                     if sigID in variables.currIDs:
                         variables.currIDs.remove(sigID)
 
                 MESSAGE = json.dumps(publishing.packet())
                 payload = bytes(MESSAGE.encode('utf-8'))
-                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
 
                 MESSAGE = json.dumps(publishing.secondPacket())
                 payload = bytes(MESSAGE.encode('utf-8'))
-                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                
+                print("hotspots")
+                print(variables.hotSpots)
 
                 if variables.visualize == 1:
                     visualize.pltPaths()
@@ -223,7 +233,6 @@ class Readin(Base):
                     visualize.pltShapes(fig)
                     plt.pause(0.000000000001)
 
-                variables.epoch += 1
                 if variables.epoch % 1000:
                     for i in range(len(variables.parentList)):
                         if len(variables.parentList[i]) > 1000:
@@ -236,12 +245,12 @@ class Readin(Base):
                             variables.speeds[i] = variables.speeds[i][-1000:]
                             variables.accel[i] = variables.accel[i][-1000:]
                             variables.dtwdistances[i] = variables.dtwdistances[i][-1000:]
+                            variables.stagedists[i] = variables.stagedists[i][-1000:]
+                        if len(variables.predictions[i]) > 1000:    
+                            variables.predictions[i] = variables.predictions[i][-1000:]
 
                     if len(variables.pairs) > 1000:
                         variables.pairs = variables.pairs[-1000:]
-
-                    if len(variables.stagedists) > 1000:
-                        variables.stagedists = variables.stagedists[-1000:]
 
                     if len(variables.allX) > 1000:
                         variables.allX = variables.allX[-1000:]
@@ -257,6 +266,8 @@ class Readin(Base):
                         variables.clusters = variables.clusters[-1000:]
                         variables.bounds = variables.bounds[-1000:]
                         variables.spreads = variables.spreads[-1000:]
+                    
+                    variables.epoch += 1
         except KeyboardInterrupt:
             pass 
 

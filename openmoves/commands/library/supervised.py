@@ -10,12 +10,12 @@ def readin(t):
         label_file = open('openmoves/commands/library/data/paths_l.txt', 'r')
         
         reader = csv.reader(x_path_file, quoting=csv.QUOTE_NONNUMERIC)
-        variables2.x_path = list(reader)
+        variables.x_path = list(reader)
         reader = csv.reader(y_path_file, quoting=csv.QUOTE_NONNUMERIC)
-        variables2.y_path = list(reader)
+        variables.y_path = list(reader)
         #reader = csv.reader(z_path_file, quoting=csv.QUOTE_NONNUMERIC)
         #variables2.z_path = list(reader)
-        variables2.l_path = label_file.read().splitlines()
+        variables.l_path = label_file.read().splitlines()
 
         x_path_file.close()
         y_path_file.close()
@@ -52,10 +52,10 @@ def predict(test, singleID):
     #for i in enumerate(test):
     mindist = float('inf')
     closest = []
-    for i in range(len(variables2.l_path)): #, j, l in variables2.x_path, variables2.y_path, variables2.l_path:
+    for i in range(len(variables.l_path)): #, j, l in variables2.x_path, variables2.y_path, variables2.l_path:
         comp = []
-        for k in range(len(variables2.x_path[i])):
-            comp.append([variables2.x_path[i][k], variables2.y_path[i][k]])
+        for k in range(len(variables.x_path[i])):
+            comp.append([variables.x_path[i][k], variables.y_path[i][k]])
 
         if len(test) > len(comp):
             test2 = test[-len(comp):]
@@ -90,13 +90,13 @@ def predict(test, singleID):
             if dist < mindist:
                 mindist = dist
                 normdist = float(len(test2)*math.pi - mindist) / (len(test2)*math.pi) 
-                closest = [variables2.l_path[i], mindist, normdist, singleID]# .append([variables2.l_path[i], mindist, normdist, singleID])
+                closest = [variables.l_path[i], mindist, normdist, singleID]# .append([variables2.l_path[i], mindist, normdist, singleID])
     
     if closest != []:       
         predictions.append(closest)
     
-    print("---------")
-    print(predictions)
+    #print("---------")
+    #print(predictions)
     return predictions
 
 def lbkeogh(p1, p2, r):

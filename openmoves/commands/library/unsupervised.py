@@ -108,8 +108,7 @@ def hotClusts2():
                     recentXY.append([currentX[j], currentY[j]])
         if recentXY == []:
             return
-        print('-------')
-        print(recentXY)
+ 
         af = MeanShift(bandwidth=1, bin_seeding=True).fit(recentXY)
         clusterCenters = af.cluster_centers_
         if clusterCenters is None:
@@ -119,7 +118,6 @@ def hotClusts2():
         variables.hotSpots = []
         for i in range(nClusts):
             variables.hotSpots.append(clusterCenters[i].tolist())
-        print(variables.hotSpots)
 
 def clusts2(currXY, allids):
     #get clusters
