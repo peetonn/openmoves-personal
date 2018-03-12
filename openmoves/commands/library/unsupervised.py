@@ -2,6 +2,8 @@ import variables
 import numpy as np
 from sklearn.cluster import AffinityPropagation
 from sklearn.cluster import MeanShift, estimate_bandwidth
+from sklearn.cluster import DBSCAN
+from sklearn.cluster import Birch
 from scipy import linalg
 from scipy.spatial import distance
 import shapely.geometry as geometry
@@ -59,6 +61,11 @@ def pca():
     #parlist = parlist[np.logical_not(np.isnan(parlist))]
     print(variables.parentList)
     print(np.asarray(variables.parentList))
+    arr = []
+    for i in variables.currIDs:
+        idx = variables.ids.index(i)
+        #subArr = 
+
     covs = np.cov(np.asarray(variables.parentList)[0].T)
     print("---------------------------")
     print(covs)
@@ -119,6 +126,7 @@ def hotClusts2():
         for i in range(nClusts):
             variables.hotSpots.append(clusterCenters[i].tolist())
 
+#experimenting with different clustering techniques
 def clusts2(currXY, allids):
     #get clusters
     if len(currXY) < 2:
@@ -186,7 +194,81 @@ def clusts2(currXY, allids):
     variables.bounds.append(currBounds)
     variables.spreads.append(currSpreads)
 
-def clusts(currXY):
+def clusts3(currXY, allids):
+    #get clusters
+    if len(currXY) < 2:
+        variables.numClusts.append(len(currXY))
+        variables.clusters.append(currXY)
+        variables.bounds.append(currXY)
+        variables.spreads.append([0])
+        variables.centers.append(currXY)
+        return
+    #bandwidth = estimate_bandwidth(currXY, n_samples=len(currXY))
+    ms = Birch(threshold=1, n_clusters=None)
+    ms.fit(currXY)
+    labels = ms.labels_
+    cluster_centers = ms.subcluster_centers_ #_indices_
+    if cluster_centers is None:
+        nClusts = 0
+    else:
+        nClusts = len(cluster_centers)
+    variables.numClusts.append(nClusts)
+    centers = []
+    for i in range(nClusts):
+        centers.append(cluster_centers[i])
+    variables.centers.append(centers)
+
+    currClusters = []
+    currBounds = []
+    currSpreads = []
+    for k in range(nClusts):
+        classMems = labels == k
+        classMem = []
+        for t in classMems:
+            if isinstance(t, tuple):
+                for x in t:
+                    classMem.append(x)
+            else:
+                classMem.append(t)
+        classMems = np.asarray(classMem)
+        currXY = np.asarray(currXY)
+        center = centers[k]
+
+        #combine points
+        ids = []
+        for j in range(len(classMems)):
+            if classMems[j] == True:
+                ids.append(allids[j])
+        x, y = currXY[classMems, 0], currXY[classMems, 1]
+        combo = [] #push combo to save each cluster at each time step
+        for i in range(len(x)):
+            combo.append((ids[i], x[i], y[i]))
+        currClusters.append(combo)
+
+        #bounds
+        pointColl = geometry.MultiPoint(combo)
+        convHull = pointColl.convex_hull
+        minx, miny, maxx, maxy = convHull.bounds
+        currBounds.append([minx, miny, maxx, maxy])
+
+        #spreads
+        dists = []
+        for j in range(len(combo)):
+            dists.append(distance.euclidean(combo[j][1:2], center))
+        currSpreads.append(sum(dists) / float(len(dists))) #normalize
+
+    variables.clusters.append(currClusters)
+    variables.bounds.append(currBounds)
+    variables.spreads.append(currSpreads)
+
+def clusts(currXY, allids):
+    if len(currXY) < 2:
+        variables.numClusts.append(len(currXY))
+        variables.clusters.append(currXY)
+        variables.bounds.append(currXY)
+        variables.spreads.append([0])
+        variables.centers.append(currXY)
+        return
     #get clusters
     af = AffinityPropagation().fit(currXY)
     clusterCenters = af.cluster_centers_indices_
@@ -220,10 +302,14 @@ def clusts(currXY):
         center = centers[k]
 
         #combine points
+        ids = []
+        for j in range(len(classMems)):
+            if classMems[j] == True:
+                ids.append(allids[j])
         x, y = currXY[classMems, 0], currXY[classMems, 1]
         combo = [] #push combo to save each cluster at each time step
         for i in range(len(x)):
-            combo.append((x[i],y[i]))
+            combo.append((ids[i], x[i], y[i]))        
         currClusters.append(combo)
 
         #bounds
@@ -235,7 +321,7 @@ def clusts(currXY):
         #spreads
         dists = []
         for j in range(len(combo)):
-            dists.append(distance.euclidean(combo[j], center))
+            dists.append(distance.euclidean(combo[j][1:2], center))        
         currSpreads.append(sum(dists) / float(len(dists))) #normalize
 
     variables.clusters.append(currClusters)

@@ -47,9 +47,6 @@ def readin(t):
             variables.l_layout.append(int(l.rstrip('\n')))
 
 def predict(test, singleID):
-
-    predictions = []
-    #for i in enumerate(test):
     mindist = float('inf')
     closest = []
     for i in range(len(variables.l_path)): #, j, l in variables2.x_path, variables2.y_path, variables2.l_path:
@@ -86,18 +83,13 @@ def predict(test, singleID):
         """
 
         if lbkeogh(test2, comp, 5) < mindist:
-            dist, blah = fastdtw.fastdtw(test2, comp, radius=25, dist=shorttime.dist)
+            dist, blah = fastdtw.fastdtw(test2, comp, radius=1, dist=shorttime.dist)
             if dist < mindist:
                 mindist = dist
                 normdist = float(len(test2)*math.pi - mindist) / (len(test2)*math.pi) 
-                closest = [variables.l_path[i], mindist, normdist, singleID]# .append([variables2.l_path[i], mindist, normdist, singleID])
-    
-    if closest != []:       
-        predictions.append(closest)
-    
-    #print("---------")
-    #print(predictions)
-    return predictions
+                closest = [variables.l_path[i], mindist, normdist, singleID]
+
+    return closest
 
 def lbkeogh(p1, p2, r):
     lbsum = 0

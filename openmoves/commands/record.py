@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import socket, time, json, random, csv
+import matplotlib.pyplot as plt
 import numpy as np
 import library.variables as variables
 import library.publishing as publishing
@@ -77,5 +78,10 @@ class Record(Base):
             wr.writerow(self.y)
             wr = csv.writer(z_path_file)
             wr.writerow(self.z)
-
+            """
+            plt.ion()
+            plt.interactive(False)
+            plt.plot(self.x, self.y, zorder=3)
+            plt.show()
+            """
             label_file.write(str(input("Enter label:"))+'\n')

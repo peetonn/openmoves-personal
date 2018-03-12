@@ -23,6 +23,17 @@ class Readin(Base):
         self.args = args
         self.kwargs = kwargs
         publishing.parse()
+        supervised.readin("path")
+        
+        """
+        plt.ion()
+        plt.interactive(False)
+        for i in range(len(variables.x_path)):
+            plt.subplot(7, 7, i+1)
+            plt.plot(variables.x_path[i], variables.y_path[i], zorder=3)
+
+        plt.show()
+        """
 
     def run(self):
         plt.ion()
@@ -43,19 +54,23 @@ class Readin(Base):
         try:
             while True:
                 variables.outofbounds = []
-
+                
                 if variables.visualize == 1:
                     plt.clf()
+                    axes = plt.gca()
+                    axes.set_xlim([variables.extents[0][0],variables.extents[1][0]])
+                    axes.set_ylim([variables.extents[0][1],variables.extents[1][1]])
+                
                 data, addr = s_in.recvfrom(8192)
                 data = data.rstrip("\0")  
                 payload = json.dumps(json.loads(data), sort_keys=True, indent=4, separators=(',', ': ') ) 
 
                 #parse as generated
                 msg = str(payload)
-
                 trackingData = json.loads(msg)
                 variables.SEQ = trackingData['header']['seq']
                 if trackingData['header']['frame_id'] == 'heartbeat':
+                    print("heart")
                     heartbeat = heartbeat + 1
                     variables.aliveIDs = trackingData['alive_IDs']
                     if heartbeat % 2 == 0:
@@ -77,6 +92,7 @@ class Readin(Base):
                     continue
                 
                 tracks = trackingData['people_tracks']
+                #print(tracks)
 
                 trackData = []
                 for singletrack in tracks:
@@ -157,7 +173,7 @@ class Readin(Base):
                 variables.allX.append(currX)
                 variables.allY.append(currY)
 
-                unsupervised.clusts2(currXY, variables.currIDs)
+                unsupervised.clusts4(currXY, variables.currIDs)
                 unsupervised.hotClusts2()
 
                 #pairwise distances
@@ -166,7 +182,17 @@ class Readin(Base):
                 #take upper triangular only, no redundant distances
                 #tempPairsTriu = list(np.asarray(tempPairs)[np.triu_indices(len(currX),1)])
                 variables.pairs.append(tempPairs)
-
+                
+                #if variables.epoch % 30 == 0:   
+                for singleID in variables.currIDs:
+                    idx = variables.ids.index(singleID)
+                    path = variables.parentList[idx]
+                    variables.predictions[idx].append(supervised.predict(path, singleID))
+                
+                for sigID in variables.outofbounds:
+                    if sigID in variables.currIDs:
+                        variables.currIDs.remove(sigID)
+                
                 doneids = []
                 for singleID in variables.currIDs:
                     idx = variables.ids.index(singleID)
@@ -174,7 +200,7 @@ class Readin(Base):
                         path = variables.parentList[idx][-150:]
                     else:
                         path = variables.parentList[idx]
-                    #variables.dtwdistances[idx] = []
+                    variables.dtwdistances[idx] = []
                     for singleID2 in variables.currIDs:
                         idx2 = variables.ids.index(singleID2)
                         if singleID2 in doneids:
@@ -205,31 +231,45 @@ class Readin(Base):
                     variables.e1.append(e1)
                     variables.e1.append(e2)
                     """
-                
-                if variables.epoch % 30 == 0:   
-                    for singleID in variables.currIDs:
-                        idx = variables.ids.index(singleID)
-                        path = variables.parentList[idx]
-                        variables.predictions[idx].append(supervised.predict(path, singleID))
 
-                for sigID in variables.outofbounds:
-                    if sigID in variables.currIDs:
-                        variables.currIDs.remove(sigID)
-
-                MESSAGE = json.dumps(publishing.packet())
+                MESSAGE = publishing.derPacket()
+                print(MESSAGE)
                 payload = bytes(MESSAGE.encode('utf-8'))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                
+                MESSAGE = publishing.distPacket()
+                print(MESSAGE)
+                payload = bytes(MESSAGE.encode('utf-8'))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                
+                MESSAGE = publishing.clustPacket()
+                print(MESSAGE)
+                payload = bytes(MESSAGE.encode('utf-8'))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                
+                MESSAGE = publishing.miscPacket()
+                print(MESSAGE)
+                payload = bytes(MESSAGE.encode('utf-8'))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                
+                MESSAGE = publishing.simPacket()
+                print(MESSAGE)
+                payload = bytes(MESSAGE.encode('utf-8'))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+
+                """----------------------------------------"""
+
+                #MESSAGE = json.dumps(publishing.packet())
+                #payload = bytes(MESSAGE.encode('utf-8'))
                 #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
 
-                MESSAGE = json.dumps(publishing.secondPacket())
-                payload = bytes(MESSAGE.encode('utf-8'))
+                #MESSAGE = json.dumps(publishing.secondPacket())
+                #payload = bytes(MESSAGE.encode('utf-8'))
                 #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
-                
-                print("hotspots")
-                print(variables.hotSpots)
 
                 if variables.visualize == 1:
                     visualize.pltPaths()
-                    visualize.pltClustering()
+                    visualize.pltClustering(currXY)
                     visualize.pltShapes(fig)
                     plt.pause(0.000000000001)
 
