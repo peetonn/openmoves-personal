@@ -70,7 +70,6 @@ class Readin(Base):
                 trackingData = json.loads(msg)
                 variables.SEQ = trackingData['header']['seq']
                 if trackingData['header']['frame_id'] == 'heartbeat':
-                    print("heart")
                     heartbeat = heartbeat + 1
                     variables.aliveIDs = trackingData['alive_IDs']
                     if heartbeat % 2 == 0:
@@ -126,7 +125,21 @@ class Readin(Base):
                             del singletrack[2]
                             childList = singletrack
                     idx = variables.ids.index(singleID)
-                    variables.parentList[idx].append(childList)
+
+                    if variables.parentList[idx] != [] and childList[0] == variables.parentList[idx][-1][0] and childList[1] == variables.parentList[idx][-1][1]:
+                        elsum = [0, 0]
+                        n = 15
+                        if len(variables.parentList[idx]) < 15:
+                            n = len(variables.parentList[idx])
+                        for i, x in enumerate(variables.parentList[idx][-n:]):
+                            elsum[0] = elsum[0] + x[0]
+                            elsum[1] = elsum[1] + x[1]
+                        elsum[0] = elsum[0] / n
+                        elsum[1] = elsum[1] / n
+                        variables.parentList[idx].append(elsum)
+                    
+                    else:
+                        variables.parentList[idx].append(childList)
 
                     instantaneous.ders(idx)   
                     instantaneous.orientation(idx)  
@@ -173,7 +186,7 @@ class Readin(Base):
                 variables.allX.append(currX)
                 variables.allY.append(currY)
 
-                unsupervised.clusts4(currXY, variables.currIDs)
+                unsupervised.clusts2(currXY, variables.currIDs)
                 unsupervised.hotClusts2()
 
                 #pairwise distances
@@ -231,7 +244,7 @@ class Readin(Base):
                     variables.e1.append(e1)
                     variables.e1.append(e2)
                     """
-
+                """"
                 MESSAGE = publishing.derPacket()
                 print(MESSAGE)
                 payload = bytes(MESSAGE.encode('utf-8'))
@@ -256,16 +269,17 @@ class Readin(Base):
                 print(MESSAGE)
                 payload = bytes(MESSAGE.encode('utf-8'))
                 s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                """
 
                 """----------------------------------------"""
 
-                #MESSAGE = json.dumps(publishing.packet())
-                #payload = bytes(MESSAGE.encode('utf-8'))
-                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                MESSAGE = json.dumps(publishing.packet())
+                payload = bytes(MESSAGE.encode('utf-8'))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
 
-                #MESSAGE = json.dumps(publishing.secondPacket())
-                #payload = bytes(MESSAGE.encode('utf-8'))
-                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                MESSAGE = json.dumps(publishing.secondPacket())
+                payload = bytes(MESSAGE.encode('utf-8'))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
 
                 if variables.visualize == 1:
                     visualize.pltPaths()
