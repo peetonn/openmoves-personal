@@ -4,8 +4,8 @@
 #general
 PERIOD = .0334 
 UDP_IP = "255.255.255.255"
-UDP_PORT_IN = 21234
-UDP_PORT_OUT = 21235
+UDP_PORT_IN = 21237
+UDP_PORT_OUT = 21238
 SEQ = 0
 epoch = 0
 visualize = 0

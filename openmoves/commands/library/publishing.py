@@ -46,11 +46,11 @@ def derPacket():
     for cur in variables.currIDs:
         idx = variables.ids.index(cur)
         if len(variables.parentList[idx]) > 2 and variables.xdersList[idx][-1] is not None:
-            firstdirs.append([variables.xdersList[idx][-1], variables.ydersList[idx][-1]])
-            speeds.append(variables.speeds[idx][-1])
+            firstdirs.append([round(variables.xdersList[idx][-1], 3), round(variables.ydersList[idx][-1], 3)])
+            speeds.append(round(variables.speeds[idx][-1], 3))
         if len(variables.parentList[idx]) > 3 and variables.xdersList[idx][-1] is not None:
-            seconddirs.append([variables.xseconddersList[idx][-1], variables.yseconddersList[idx][-1]])
-            accel.append(variables.accel[idx][-1])
+            seconddirs.append([round(variables.xseconddersList[idx][-1], 3), round(variables.yseconddersList[idx][-1], 3)])
+            accel.append(round(variables.accel[idx][-1], 3))
 
     return json.dumps({"packet": {"type": "openmoves", "version": 1, "subtype": "derivatives"}, "header": {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}, "ids": variables.currIDs, "dims": 2, 
         "values":{"d1": firstdirs, "d2": seconddirs, "speed": speeds, "acceleration": accel}}, indent=4, separators=(',', ': '))
@@ -72,9 +72,13 @@ def distPacket():
     nsec = int((now-sec) * 1e9)
     
     pairs = variables.pairs[-1]
-    
+    roundedPairs = []
+    for pairlist in pairs:
+        rounded = [round(elem, 3) for elem in pairlist]
+        roundedPairs.append(rounded)
+
     return json.dumps({"packet":{"type":"openmoves", "version":1, "subtype": "pairdistance"}, "header": {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}, "ids": variables.currIDs, "dims": 2, 
-        "values":{"pairwise": pairs}}, indent=4, separators=(',', ': '))
+        "values":{"pairwise": roundedPairs}}, indent=4, separators=(',', ': '))
 
 """{
     "packet" : { "type":"openmoves", "version":1, "subtype": "stagedistance" },
@@ -95,7 +99,7 @@ def distPacket2():
     stagedists = []
     for cur in variables.currIDs:
         idx = variables.ids.index(cur)
-        stagedists.append(variables.stagedists[idx][-1])
+        stagedists.append(variables.stagedists[idx][-1])#[round(elem,3) for elem in variables.stagedists[idx][-1]])
         
     return json.dumps({"packet":{"type":"openmoves", "version":1, "subtype": "stagedistance"}, "header": {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}, "ids": variables.currIDs, "dims": 2, 
         "values":{"stage": stagedists, "poi": []}}, indent=4, separators=(',', ': '))
@@ -119,7 +123,11 @@ def clustPacket():
     centers = variables.centers[-1]
     clusters = variables.clusters[-1]
     spreads = variables.spreads[-1]
-    
+
+    roundedCenters = []
+    for center in centers:
+        newCenter = []
+
     return json.dumps({"packet":{"type":"openmoves", "version":1, "subtype": "cluster"}, "header": {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}, "ids": variables.currIDs, "dims": 2, 
         "values":{"center": centers, "cluster": clusters, "spread": spreads}}, indent=4, separators=(',', ': '))
 

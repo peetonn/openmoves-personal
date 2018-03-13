@@ -12,8 +12,12 @@ import library.unsupervised as unsupervised
 import library.visualization as visualize
 import library.shorttime as shorttime
 import library.supervised as supervised
+import datetime
 
 from .base import Base
+
+def timestampMs():
+    return float((datetime.datetime.utcnow() - datetime.datetime(1970,1,1)).total_seconds() * 1000)
 
 class Readin(Base):
     """Read in data from OPT, organize it and save to variables"""
@@ -43,33 +47,40 @@ class Readin(Base):
         s_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
         s_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s_out.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 8192)
+        s_out.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65535)
         s_out.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST,1)
 
         s_in.bind(("", variables.UDP_PORT_IN))
         print("waiting on port:", variables.UDP_PORT_IN)
 
         heartbeat = 0
-        
+        lastseq = 0
         try:
             while True:
-                try:
+                #try:
                     variables.outofbounds = []
                     
-                    if variables.visualize == 1:
-                        plt.clf()
-                        axes = plt.gca()
-                        axes.set_xlim([variables.extents[0][0],variables.extents[1][0]])
-                        axes.set_ylim([variables.extents[0][1],variables.extents[1][1]])
-                    
+                    #if variables.visualize == 1:
+                    plt.clf()
+                    axes = plt.gca()
+                    axes.set_xlim([variables.extents[0][0],variables.extents[1][0]])
+                    axes.set_ylim([variables.extents[0][1],variables.extents[1][1]])
+                
                     data, addr = s_in.recvfrom(8192)
                     data = data.rstrip("\0")  
                     payload = json.dumps(json.loads(data), sort_keys=True, indent=4, separators=(',', ': ') ) 
-
+                    print("----------------------------")
                     #parse as generated
+
+                    t1 = timestampMs()
+
                     msg = str(payload)
                     trackingData = json.loads(msg)
                     variables.SEQ = trackingData['header']['seq']
+                    if variables.SEQ < lastseq:
+                        print("OUT OF ORDER PACKET!")
+                        continue
+                    lastseq = variables.SEQ
                     if trackingData['header']['frame_id'] == 'heartbeat':
                         heartbeat = heartbeat + 1
                         variables.aliveIDs = trackingData['alive_IDs']
@@ -89,7 +100,7 @@ class Readin(Base):
                                     del variables.accel[idx]
                                     del variables.predictions[idx]
                                     del variables.stagedists[idx]
-                                    variables.currIDs.remove(singleID)
+                                    #variables.currIDs.remove(singleID)
                         continue
                     
                     tracks = trackingData['people_tracks']
@@ -128,6 +139,7 @@ class Readin(Base):
                                 childList = singletrack
                         idx = variables.ids.index(singleID)
 
+                        #de-duping -- if packet is duplicate, use average
                         if variables.parentList[idx] != [] and childList[0] == variables.parentList[idx][-1][0] and childList[1] == variables.parentList[idx][-1][1]:
                             elsum = [0, 0]
                             n = 15
@@ -142,18 +154,18 @@ class Readin(Base):
                         
                         else:
                             variables.parentList[idx].append(childList)
-
+                        
                         instantaneous.ders(idx)   
                         instantaneous.orientation(idx)  
 
                         if singleID not in variables.currIDs:
                             variables.currIDs.append(singleID)
-                    
+                
                     for singleID in variables.aliveIDs:
                         if singleID not in allids:
-                            #if singleID not in variables.ids:
-                            #    variables.currIDs.remove(singleID)
-                            #    continue
+                            if singleID not in variables.ids:
+                                variables.currIDs.remove(singleID)
+                                continue
                             idx = variables.ids.index(singleID)
                             elsum = [0, 0]
                             n = 15
@@ -167,18 +179,22 @@ class Readin(Base):
                             variables.parentList[idx].append(elsum)
                             instantaneous.ders(idx)
                             instantaneous.orientation(idx)
-                    
+                    "initial feed in end"
+                    t2 = timestampMs()
+                    print("ders/data ingestion")
+                    print(t2 - t1)
+                    t1 = timestampMs()
                     currX = []
                     currY = []
                     currXY = []
                     for singleID in variables.currIDs:
-                        #if singleID not in variables.ids:
+                        if singleID not in variables.ids:
                         #    print("singleID: ", singleID)
                         #    print("current loop IDs: ", allids)
                         #    print("aliveIDs: ", variables.currIDs)
                         #    print("all saved IDs: ", variables.ids)
-                        #    variables.currIDs.remove(singleID)
-                        #    continue
+                            variables.currIDs.remove(singleID)
+                            continue
                         idx = variables.ids.index(singleID)
                         currXY.append(variables.parentList[idx][-1])
                         currX.append(currXY[-1][0])
@@ -188,34 +204,57 @@ class Readin(Base):
                             del currXY[-1]
                             del currX[-1]
                             del currY[-1]
+                    t2 = timestampMs()
+                    print("stage dists")
+                    print(t2-t1)
 
+                    t1 = timestampMs()
                     variables.allX.append(currX)
                     variables.allY.append(currY)
+                    
+                    if variables.epoch % variables.shorttimespan == 0:
+                        unsupervised.clusts2(currXY, variables.currIDs)
+                    
+                    t2 = timestampMs()
+                    print("clusters")
+                    print(t2 - t1)
 
-                    unsupervised.clusts2(currXY, variables.currIDs)
-                    if variables.epoch % 100 == 0:
+                    t1 = timestampMs()
+                    if variables.epoch % variables.hotspotwindow == 0:
                         unsupervised.hotClusts2()
+                    t2 = timestampMs()
+                    print("hotspots")
+                    print(t2 - t1)
 
+                    t1 = timestampMs()
                     #pairwise distances
                     tempPairs = instantaneous.pairwise(currX, currY)
-
+                    t2 = timestampMs()
+                    print("pairwise")
+                    print(t2 - t1)
                     #take upper triangular only, no redundant distances
                     #tempPairsTriu = list(np.asarray(tempPairs)[np.triu_indices(len(currX),1)])
                     variables.pairs.append(tempPairs)
-                    
+                    """
+                    t1 = timestampMs()
                     if variables.epoch % 30 == 0:   
                         for singleID in variables.currIDs:
-                            #if singleID not in variables.ids:
-                            #    variables.currIDs.remove(singleID)
-                            #    continue
+                            if singleID not in variables.ids:
+                                variables.currIDs.remove(singleID)
+                                continue
                             idx = variables.ids.index(singleID)
                             path = variables.parentList[idx]
                             variables.predictions[idx].append(supervised.predict(path, singleID))
-                        
+                    t2 = timestampMs()
+                    print('predictions')
+                    print(t2 - t1)
+                    """
+
+                    t1 = timestampMs()
                     for sigID in variables.outofbounds:
                         if sigID in variables.currIDs:
                             variables.currIDs.remove(sigID)
-                    
+                    """
                     if variables.epoch % 25 == 0:
                         doneids = []
                         for singleID in variables.currIDs:
@@ -241,57 +280,67 @@ class Readin(Base):
 
                                 variables.dtwdistances[idx].append(shorttime.doFastDTW(path, otherpath))
                             doneids.append(singleID)
+                    t2 = timestampMs()
                     
-
-                    print(variables.numClusts[-1])
-
+                    print("dtw")
+                    print(t2 - t1)
                     """
-                    if variables.epoch % variables.pcarefresh == 0 and aliveids > 0:
+                    """
+                    if variables.epoch % variables.pcarefresh == 0:
                         #results ordered as: x1, y1, x2, y1,..., xn, yn
                         variables.e1 = []
                         variables.e2 = []
                         e1, e2 = unsupervised.pca()
+                        if e1 == [] or e2 == []:
+                            variables.e1.append(e1)
+                            variables.e1.append(e2) 
+                            continue
                         e1 = list(e1)
                         e2 = list(e2)
                         e1[1] = e1[1].tolist()
                         e2[1] = e2[1].tolist()
                         variables.e1.append(e1)
                         variables.e1.append(e2)
-                        """
-                    """"
+                    """
+                    print(len(variables.currIDs))
                     MESSAGE = publishing.derPacket()
-                    print(MESSAGE)
+                    #print(MESSAGE)
                     payload = bytes(MESSAGE.encode('utf-8'))
+                    print(len(payload))
                     s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
-                    
+                    """
                     MESSAGE = publishing.distPacket()
-                    print(MESSAGE)
+                    #print(MESSAGE)
                     payload = bytes(MESSAGE.encode('utf-8'))
+                    print(len(payload))
                     s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
                     
                     MESSAGE = publishing.distPacket2()
-                    print(MESSAGE)
+                    #print(MESSAGE)
                     payload = bytes(MESSAGE.encode('utf-8'))
+                    print(len(payload))
                     s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
-
+                    """
                     MESSAGE = publishing.clustPacket()
-                    print(MESSAGE)
+                    #print(MESSAGE)
                     payload = bytes(MESSAGE.encode('utf-8'))
+                    print(len(payload))
                     s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
-                    
+                    """
                     MESSAGE = publishing.miscPacket()
-                    print(MESSAGE)
+                    #print(MESSAGE)
                     payload = bytes(MESSAGE.encode('utf-8'))
+                    print(len(payload))
                     s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
                     
                     MESSAGE = publishing.simPacket()
-                    print(MESSAGE)
+                    #print(MESSAGE)
                     payload = bytes(MESSAGE.encode('utf-8'))
+                    print(len(payload))
                     s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
                     """
-
                     """----------------------------------------"""
-
+                    """
                     MESSAGE = json.dumps(publishing.packet())
                     payload = bytes(MESSAGE.encode('utf-8'))
                     s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
@@ -299,6 +348,10 @@ class Readin(Base):
                     MESSAGE = json.dumps(publishing.secondPacket())
                     payload = bytes(MESSAGE.encode('utf-8'))
                     s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                    """
+
+                    visualize.pltClustering(currXY)
+                    plt.pause(0.000000000001)
 
                     if variables.visualize == 1:
                         visualize.pltPaths()
@@ -341,8 +394,8 @@ class Readin(Base):
                             variables.spreads = variables.spreads[-1000:]
                         
                         variables.epoch += 1
-                except:
-                    continue
+                #except:
+                #    continue
         except KeyboardInterrupt:
             pass 
 
