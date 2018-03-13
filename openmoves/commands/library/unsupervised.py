@@ -59,17 +59,31 @@ def pca():
 
     #parlist = np.asarray(parlist)
     #parlist = parlist[np.logical_not(np.isnan(parlist))]
-    print(variables.parentList)
-    print(np.asarray(variables.parentList))
-    arr = []
-    for i in variables.currIDs:
-        idx = variables.ids.index(i)
-        #subArr = 
+    lists = []
+    shortest = float('inf')
+    for sigid in variables.currIDs:
+        idx = variables.ids.index(sigid)
+        if len(variables.parentList[idx]) < 5:
+            continue 
+        if len(variables.parentList[idx]) < shortest:
+            shortest = len(variables.parentList[idx])
+        lists.append(variables.parentList[idx])
+    
+    splitLists = []
+    for i in range(len(lists)):
+        lists[i] = lists[i][-shortest:]
+        splitLists.append([element[0] for element in lists[i]])
+        splitLists.append([element[1] for element in lists[i]])
 
-    covs = np.cov(np.asarray(variables.parentList)[0].T)
+    print("---------------------------")
+    print(np.asarray(splitLists))
+    if splitLists == []:
+        return [], []
+    covs = np.cov(np.asarray(splitLists))
     print("---------------------------")
     print(covs)
     ea, va = np.linalg.eig(covs)
+    print("---------------------------")
 
     #pair and sort the eigenvectors with respective eigenvalues
     #expairs = [(np.abs(ex[i]), vx[:,i]) for i in range(len(ex))]
@@ -131,7 +145,7 @@ def clusts2(currXY, allids):
     #get clusters
     if len(currXY) < 2:
         variables.numClusts.append(len(currXY))
-        variables.clusters.append(currXY)
+        variables.clusters.append([allids[0], currXY[0][0], currXY[0][1]])
         variables.bounds.append(currXY)
         variables.spreads.append([0])
         variables.centers.append(currXY)
@@ -198,7 +212,7 @@ def clusts3(currXY, allids):
     #get clusters
     if len(currXY) < 2:
         variables.numClusts.append(len(currXY))
-        variables.clusters.append(currXY)
+        variables.clusters.append([allids[0], currXY[0][0], currXY[0][1]])
         variables.bounds.append(currXY)
         variables.spreads.append([0])
         variables.centers.append(currXY)
@@ -254,7 +268,7 @@ def clusts3(currXY, allids):
         #spreads
         dists = []
         for j in range(len(combo)):
-            dists.append(distance.euclidean(combo[j][1:2], center))
+            dists.append(distance.euclidean(combo[j][1:], center))
         currSpreads.append(sum(dists) / float(len(dists))) #normalize
 
     variables.clusters.append(currClusters)
