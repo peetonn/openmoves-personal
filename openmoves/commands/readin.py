@@ -241,55 +241,56 @@ class Readin(Base):
 
                         variables.dtwdistances[idx].append(shorttime.doFastDTW(path, otherpath))
                     doneids.append(singleID)
-                
-                if variables.epoch % variables.pcarefresh == 0 and variables.currIDs > 0:
-                    #results ordered as: x1, y1, x2, y1,..., xn, yn
-                    variables.e1 = []
-                    variables.e2 = []
-                    e1, e2 = unsupervised.pca()
-                    if e1 == [] or e2 == []:
+                    
+                    """
+                    if variables.epoch % variables.pcarefresh == 0 and variables.currIDs > 0:
+                        #results ordered as: x1, y1, x2, y1,..., xn, yn
+                        variables.e1 = []
+                        variables.e2 = []
+                        e1, e2 = unsupervised.pca()
+                        if e1 == [] or e2 == []:
+                            variables.e1.append(e1)
+                            variables.e1.append(e2)
+                            continue
+                        e1 = list(e1)
+                        e2 = list(e2)
+                        e1[1] = e1[1].tolist()
+                        e2[1] = e2[1].tolist()
+                        print("---------------------------")
+                        print("---------------------------")
+                        print("---------------------------")
+                        print(e1)
+                        print("---------------------------")
+                        print("---------------------------")
+                        print("---------------------------")
                         variables.e1.append(e1)
                         variables.e1.append(e2)
-                        continue
-                    e1 = list(e1)
-                    e2 = list(e2)
-                    e1[1] = e1[1].tolist()
-                    e2[1] = e2[1].tolist()
-                    print("---------------------------")
-                    print("---------------------------")
-                    print("---------------------------")
-                    print(e1)
-                    print("---------------------------")
-                    print("---------------------------")
-                    print("---------------------------")
-                    variables.e1.append(e1)
-                    variables.e1.append(e2)
-                    
+                    """   
 
-                MESSAGE = publishing.derPacket()
-                #print(MESSAGE)
-                payload = bytes(MESSAGE.encode('utf-8'))
-                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
-                
-                MESSAGE = publishing.distPacket()
-                #print(MESSAGE)
-                payload = bytes(MESSAGE.encode('utf-8'))
-                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
-                
-                MESSAGE = publishing.clustPacket()
-                #print(MESSAGE)
-                payload = bytes(MESSAGE.encode('utf-8'))
-                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
-                
-                MESSAGE = publishing.miscPacket()
-                #print(MESSAGE)
-                payload = bytes(MESSAGE.encode('utf-8'))
-                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
-                
-                MESSAGE = publishing.simPacket()
-                #print(MESSAGE)
-                payload = bytes(MESSAGE.encode('utf-8'))
-                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                    MESSAGE = publishing.derPacket()
+                    #print(MESSAGE)
+                    payload = bytes(MESSAGE.encode('utf-8'))
+                    #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                    
+                    MESSAGE = publishing.distPacket()
+                    #print(MESSAGE)
+                    payload = bytes(MESSAGE.encode('utf-8'))
+                    #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                    
+                    MESSAGE = publishing.clustPacket()
+                    #print(MESSAGE)
+                    payload = bytes(MESSAGE.encode('utf-8'))
+                    #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                    
+                    MESSAGE = publishing.miscPacket()
+                    #print(MESSAGE)
+                    payload = bytes(MESSAGE.encode('utf-8'))
+                    #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                    
+                    MESSAGE = publishing.simPacket()
+                    #print(MESSAGE)
+                    payload = bytes(MESSAGE.encode('utf-8'))
+                    s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
 
                     """----------------------------------------"""
 
