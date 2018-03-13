@@ -7,6 +7,7 @@ import shapely.geometry as geometry
 from descartes import PolygonPatch
 
 """Unsupervised analysis module"""
+#create an interpolated covariance matrix w/o nans?
 def covariance(): #deprecated
     #ignore entries of resulting matrix with indicies not both odd or even
     #create a matrix such that each column is the x or y of a particular actor
@@ -68,11 +69,13 @@ def hotClusts(): #need to remove duplicates
             currentX = variables.allX[len(variables.allX)-i]
             currentY = variables.allY[len(variables.allX)-i]
             for j in range(len(currentX)):
-                recentXY.append([currentX[j], currentY[j]])
+                if currentX[j] != float('nan') and currentY[j] != float('nan'):
+                    #print([currentX[j], currentY[j]])
+                    recentXY.append([currentX[j], currentY[j]])
 
         af = AffinityPropagation().fit(recentXY)
         clusterCenters = af.cluster_centers_indices_
-        
+        #print(clusterCenters)
         if clusterCenters is None:
             nClusts = 0
         else:

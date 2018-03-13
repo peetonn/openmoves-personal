@@ -111,7 +111,7 @@ def slidingdtw(p1, p2, slidesize):
             inner2 = makerotationinvariant(inner)
             inner2 = iterativeNormalization(inner)
             inner2 = interpolate(inner)
-            if lbkeogh(outer, inner, 5) < mindist:
+            if lbkeogh(outer, inner2, 5) < mindist:
                 distn, ind = fastdtw.fastdtw(outer, inner2, dist=dist)
                 if distn < mindist:
                     mindist = distn

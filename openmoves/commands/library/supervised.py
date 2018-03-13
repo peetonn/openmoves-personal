@@ -1,21 +1,26 @@
 import numpy as np
-import variables, shorttime, math, csv
+import variables, variables2, shorttime, math, csv, fastdtw
 from scipy.stats.mstats import zscore
 
 def readin(t):
     if t == "path":
-        x_path_file = open('library/data/paths_x.txt', 'r')
-        y_path_file = open('library/data/paths_y.txt', 'r')
-        z_path_file = open('library/data/paths_z.txt', 'r')
+        x_path_file = open('library/data/paths_x.csv', 'r')
+        y_path_file = open('library/data/paths_y.csv', 'r')
+        z_path_file = open('library/data/paths_z.csv', 'r')
         label_file = open('library/data/paths_l.txt', 'r')
         
-        reader = csv.reader(x_path_file)
-        variables.x_path = list(reader)
-        reader = csv.reader(y_path_file)
-        variables.y_path = list(reader)
-        reader = csv.reader(z_path_file)
-        variables.z_path = list(reader)
-        variables.l_path = label_file.read().splitlines()
+        reader = csv.reader(x_path_file, quoting=csv.QUOTE_NONNUMERIC)
+        variables2.x_path = list(reader)
+        reader = csv.reader(y_path_file, quoting=csv.QUOTE_NONNUMERIC)
+        variables2.y_path = list(reader)
+        #reader = csv.reader(z_path_file, quoting=csv.QUOTE_NONNUMERIC)
+        #variables2.z_path = list(reader)
+        variables2.l_path = label_file.read().splitlines()
+
+        x_path_file.close()
+        y_path_file.close()
+        z_path_file.close()
+        label_file.close()
 
     if t == "layout":
         x_layout_file = open('library/data/layouts_x.csv', 'r')
@@ -38,47 +43,59 @@ def readin(t):
         for z in z_layout_file:
             variables.z_layout.append([float(ts) for ts in z.split()])
             
-        for y in label_file:
+        for l in label_file:
             variables.l_layout.append(int(l.rstrip('\n')))
 
-def predict(test):
+def predict(test, singleID):
+
     predictions = []
     #for i in enumerate(test):
     mindist = float('inf')
     closest = []
-
-    for i, j, l in variables.x_path, variables.y_path, variables.l_path:
+    for i in range(len(variables2.x_path)): #, j, l in variables2.x_path, variables2.y_path, variables2.l_path:
         comp = []
-        for k in range(len(i)):
-            comp.append([i[k], j[k]])
+        for k in range(len(variables2.x_path[i])):
+            comp.append([variables2.x_path[i][k], variables2.y_path[i][k]])
+
+        if len(test) > len(comp):
+            test2 = test[-len(comp):]
+
+        else:
+            continue
 
         comp = shorttime.makerotationinvariant(comp)
         comp = shorttime.iterativeNormalization(comp)
-        comp = interpolate(comp)
+        comp = shorttime.interpolate(comp)
 
-        test = shorttime.makerotationinvariant(test)
-        test = shorttime.iterativeNormalization(test)
-        test = interpolate(test)
-        
-        if lbkeogh(test, comp, 5) < mindist:
-            dist = fastdtw.fastdtw(test, comp, dist=shorttime.dist)
+        test2 = shorttime.makerotationinvariant(test2)
+        test2 = shorttime.iterativeNormalization(test2)
+        test2 = shorttime.interpolate(test2)
+
+        if lbkeogh(test2, comp, 5) < mindist:
+            dist, blah = fastdtw.fastdtw(test2, comp, dist=shorttime.dist)
             if dist < mindist:
                 mindist = dist
-                closest = l
-    predictions.append(closest)
+                normdist = float(len(test2)*math.pi - mindist) / (len(test2)*math.pi) 
+                closest.append([variables2.l_path[i], mindist, normdist, singleID])
+    
+    if closest != []:
+        print("---------")
+        predictions.append(closest)
+        print(predictions)
     return predictions
 
 def lbkeogh(p1, p2, r):
     lbsum = 0
-    for ind, i in enumerate(p1):       
-        lower = min(p2[(ind - r if ind - r > = 0 else 0):(ind + r)])
-        upper = max(p2[(ind - r if ind - r > = 0 else 0):(ind + r)])
+    for ind, i in enumerate(p1):
+        lower = min(p2[(ind - r if ind - r >= 0 else 0):(ind + r)])
+        upper = max(p2[(ind - r if ind - r >= 0 else 0):(ind + r)])
         
         if i > upper:
             lbsum = lbsum + (i - upper)**2
         elif i < lower:
             lbsum = lbsum + (i - lower)**2
     
+
     return np.sqrt(lbsum)
 
 """
