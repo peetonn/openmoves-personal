@@ -4,11 +4,15 @@ import socket, time, json, time, random, sys
 from time import sleep
 
 UDP_IP = "127.0.0.1"
+# UDP_IP = "255.255.255.255"
+UDP_IP = "192.168.1.255" # 169.254.255.255
 
 def main(port, rate, dat, loop):
 	delay = 1000./float(rate)
 	try:
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP   
+		sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
 		with open(data, "r") as f:
 			allLines = f.readlines()
 			run = 1
