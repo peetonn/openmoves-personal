@@ -73,7 +73,7 @@ class Readin(Base):
                     if trackingData['header']['frame_id'] == 'heartbeat':
                         heartbeat = heartbeat + 1
                         variables.aliveIDs = trackingData['alive_IDs']
-                        if heartbeat % 2 == 0:
+                        if heartbeat % 5 == 0:
                             for singleID in variables.ids:
                                 if singleID not in variables.aliveIDs:
                                     idx = variables.ids.index(singleID)
@@ -89,6 +89,7 @@ class Readin(Base):
                                     del variables.accel[idx]
                                     del variables.predictions[idx]
                                     del variables.stagedists[idx]
+                                    variables.currIDs.remove(singleID)
                         continue
                     
                     tracks = trackingData['people_tracks']
@@ -150,9 +151,9 @@ class Readin(Base):
                     
                     for singleID in variables.aliveIDs:
                         if singleID not in allids:
-                            if singleID not in variables.ids:
-                                variables.currIDs.remove(singleID)
-                                continue
+                            #if singleID not in variables.ids:
+                            #    variables.currIDs.remove(singleID)
+                            #    continue
                             idx = variables.ids.index(singleID)
                             elsum = [0, 0]
                             n = 15
@@ -171,9 +172,13 @@ class Readin(Base):
                     currY = []
                     currXY = []
                     for singleID in variables.currIDs:
-                        if singleID not in variables.ids:
-                            variables.currIDs.remove(singleID)
-                            continue
+                        #if singleID not in variables.ids:
+                        #    print("singleID: ", singleID)
+                        #    print("current loop IDs: ", allids)
+                        #    print("aliveIDs: ", variables.currIDs)
+                        #    print("all saved IDs: ", variables.ids)
+                        #    variables.currIDs.remove(singleID)
+                        #    continue
                         idx = variables.ids.index(singleID)
                         currXY.append(variables.parentList[idx][-1])
                         currX.append(currXY[-1][0])
@@ -200,6 +205,9 @@ class Readin(Base):
                     
                     if variables.epoch % 30 == 0:   
                         for singleID in variables.currIDs:
+                            #if singleID not in variables.ids:
+                            #    variables.currIDs.remove(singleID)
+                            #    continue
                             idx = variables.ids.index(singleID)
                             path = variables.parentList[idx]
                             variables.predictions[idx].append(supervised.predict(path, singleID))
@@ -325,8 +333,8 @@ class Readin(Base):
                             variables.spreads = variables.spreads[-1000:]
                         
                         variables.epoch += 1
-                    except:
-                        continue
+                except:
+                    continue
         except KeyboardInterrupt:
             pass 
 
