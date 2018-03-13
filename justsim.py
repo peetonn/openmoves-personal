@@ -5,7 +5,7 @@ from time import sleep
 
 UDP_IP = "127.0.0.1"
 # UDP_IP = "255.255.255.255"
-UDP_IP = "192.168.1.255" # 169.254.255.255
+UDP_IP = "192.168.30.255" # 169.254.255.255
 
 def main(port, rate, dat, loop):
 	delay = 1000./float(rate)
