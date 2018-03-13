@@ -17,11 +17,11 @@ def pltPaths():
     
 def pltClustering(currXY):
     #plot clustering
-    #centers = variables.centers[-1]
-    #clusters = variables.clusters[-1]
+    centers = variables.centers[-1]
+    clusters = variables.clusters[-1]
     for i in range(len(currXY)):
         plt.plot(currXY[i][0], currXY[i][1], 'go', zorder=5)
-    """
+    
     for k in range(variables.numClusts[-1]):
         center = centers[k]
         combo = clusters[k]
@@ -35,7 +35,7 @@ def pltClustering(currXY):
         except:
             plt.plot(combo[0], combo[1], 'g' + '.', zorder=4)
             plt.plot([center[0], combo[0]], [center[1], combo[1]], 'r' + '--', zorder=2)
-    """
+    
 
 def pltShapes(fig):    
     #Better method: calculate number of acute angles along convex hull 

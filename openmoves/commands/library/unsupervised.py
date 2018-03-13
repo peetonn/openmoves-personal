@@ -201,7 +201,7 @@ def clusts2(currXY, allids):
         #spreads
         dists = []
         for j in range(len(combo)):
-            dists.append(distance.euclidean(combo[j][1:2], center))
+            dists.append(distance.euclidean(combo[j][1:], center))
         currSpreads.append(sum(dists) / float(len(dists))) #normalize
 
     variables.clusters.append(currClusters)
