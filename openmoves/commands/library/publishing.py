@@ -56,7 +56,7 @@ def derPacket():
         "values":{"d1": firstdirs, "d2": seconddirs, "speed": speeds, "acceleration": accel}}, indent=4, separators=(',', ': '))
 
 """{
-    "packet" : { "type":"openmoves", "version":1, "subtype": "distance" },
+    "packet" : { "type":"openmoves", "version":1, "subtype": "pairdistance" },
     "header" : {"seq":1234, "stamp":{"sec":11234, "nsec":11234}},
     "ids" : [14, 23],
     "dims" : 3,
@@ -70,16 +70,35 @@ def distPacket():
     now = float(time.time())
     sec = int(now)
     nsec = int((now-sec) * 1e9)
+    
+    pairs = variables.pairs[-1]
+    
+    return json.dumps({"packet":{"type":"openmoves", "version":1, "subtype": "pairdistance"}, "header": {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}, "ids": variables.currIDs, "dims": 2, 
+        "values":{"pairwise": pairs}}, indent=4, separators=(',', ': '))
+
+"""{
+    "packet" : { "type":"openmoves", "version":1, "subtype": "stagedistance" },
+    "header" : {"seq":1234, "stamp":{"sec":11234, "nsec":11234}},
+    "ids" : [14, 23],
+    "dims" : 3,
+    "values" : {
+        "pairwise": [],
+        "stage": {},
+        "poi" : {}
+        }
+}"""  
+def distPacket2():
+    now = float(time.time())
+    sec = int(now)
+    nsec = int((now-sec) * 1e9)
 
     stagedists = []
     for cur in variables.currIDs:
         idx = variables.ids.index(cur)
         stagedists.append(variables.stagedists[idx][-1])
-    
-    pairs = variables.pairs[-1]
-    
-    return json.dumps({"packet":{"type":"openmoves", "version":1, "subtype": "distance"}, "header": {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}, "ids": variables.currIDs, "dims": 2, 
-        "values":{"pairwise": pairs, "stage": stagedists, "poi": []}}, indent=4, separators=(',', ': '))
+        
+    return json.dumps({"packet":{"type":"openmoves", "version":1, "subtype": "stagedistance"}, "header": {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}, "ids": variables.currIDs, "dims": 2, 
+        "values":{"stage": stagedists, "poi": []}}, indent=4, separators=(',', ': '))
 
 """{
     "packet" : { "type":"openmoves", "version":1, "subtype": "cluster" },
@@ -118,10 +137,6 @@ def miscPacket():
     now = float(time.time())
     sec = int(now)
     nsec = int((now-sec) * 1e9)
-
-    centers = variables.centers[-1]
-    clusters = variables.clusters[-1]
-    spreads = variables.spreads[-1]
     
     return json.dumps({"packet":{"type":"openmoves", "version":1, "subtype": "massdynamics"}, "header": {"seq":variables.SEQ, "stamp":{"sec":sec, "nsec":nsec}}, "ids": variables.currIDs, "dims": 2, 
         "values":{"hotspot":variables.hotSpots, "trend":{"eigenvalue": 1, "eigenvector": [1,2,3]}}}, indent=4, separators=(',', ': '))

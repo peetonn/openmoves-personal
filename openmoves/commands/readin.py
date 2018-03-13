@@ -165,6 +165,7 @@ class Readin(Base):
                     currX.append(currXY[-1][0])
                     currY.append(currXY[-1][1])
                     variables.stagedists[idx].append(instantaneous.linedists(currXY[-1]))
+
                     if currX[-1] < variables.extents[0][0] or currX[-1] > variables.extents[1][0] or currY[-1] < variables.extents[0][1] or currY[-1] > variables.extents[1][1]:
                         del currXY[-1]
                         del currX[-1]
@@ -174,7 +175,8 @@ class Readin(Base):
                 variables.allY.append(currY)
 
                 unsupervised.clusts2(currXY, variables.currIDs)
-                unsupervised.hotClusts2()
+                if variables.epoch % variables.hotspotwindow == 0:
+                    unsupervised.hotClusts2()
 
                 #pairwise distances
                 tempPairs = instantaneous.pairwise(currX, currY)
@@ -183,12 +185,12 @@ class Readin(Base):
                 #tempPairsTriu = list(np.asarray(tempPairs)[np.triu_indices(len(currX),1)])
                 variables.pairs.append(tempPairs)
                 
-                #if variables.epoch % 30 == 0:   
-                for singleID in variables.currIDs:
-                    idx = variables.ids.index(singleID)
-                    path = variables.parentList[idx]
-                    variables.predictions[idx].append(supervised.predict(path, singleID))
-                
+                if variables.epoch % 30 == 0:   
+                    for singleID in variables.currIDs:
+                        idx = variables.ids.index(singleID)
+                        path = variables.parentList[idx]
+                        variables.predictions[idx].append(supervised.predict(path, singleID))
+                    
                 for sigID in variables.outofbounds:
                     if sigID in variables.currIDs:
                         variables.currIDs.remove(sigID)
@@ -218,6 +220,7 @@ class Readin(Base):
                         variables.dtwdistances[idx].append(shorttime.doFastDTW(path, otherpath))
                     doneids.append(singleID)
                 
+                """
                 if variables.epoch % variables.pcarefresh == 0 and variables.currIDs > 0:
                     #results ordered as: x1, y1, x2, y1,..., xn, yn
                     variables.e1 = []
@@ -240,32 +243,37 @@ class Readin(Base):
                     print("---------------------------")
                     variables.e1.append(e1)
                     variables.e1.append(e2)
-                    
+                """    
 
                 MESSAGE = publishing.derPacket()
                 #print(MESSAGE)
                 payload = bytes(MESSAGE.encode('utf-8'))
-                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
                 
                 MESSAGE = publishing.distPacket()
                 #print(MESSAGE)
                 payload = bytes(MESSAGE.encode('utf-8'))
-                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
                 
+                MESSAGE = publishing.distPacket2()
+                #print(MESSAGE)
+                payload = bytes(MESSAGE.encode('utf-8'))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+
                 MESSAGE = publishing.clustPacket()
                 #print(MESSAGE)
                 payload = bytes(MESSAGE.encode('utf-8'))
-                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
                 
                 MESSAGE = publishing.miscPacket()
                 #print(MESSAGE)
                 payload = bytes(MESSAGE.encode('utf-8'))
-                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
                 
                 MESSAGE = publishing.simPacket()
                 #print(MESSAGE)
                 payload = bytes(MESSAGE.encode('utf-8'))
-                #s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
+                s_out.sendto(payload, (variables.UDP_IP, variables.UDP_PORT_OUT))
 
                 """----------------------------------------"""
 

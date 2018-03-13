@@ -32,6 +32,7 @@ xseconddersList = []
 yseconddersList = []
 orientations = []
 stagedists = []
+poidists = []
 speeds = []
 accel = []
 
