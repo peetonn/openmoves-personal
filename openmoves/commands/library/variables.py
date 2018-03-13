@@ -36,6 +36,8 @@ poidists = []
 speeds = []
 accel = []
 
+aliveIDs = []
+
 #for plotting
 allX = []
 allY = []
