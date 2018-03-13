@@ -182,7 +182,10 @@ def packet():
         if len(variables.parentList[idx]) > 3 and variables.xdersList[idx][-1] is not None:
             seconddirs.append([variables.xseconddersList[idx][-1], variables.yseconddersList[idx][-1]])
             accel.append(variables.accel[idx][-1])
-        stagedists.append(variables.stagedists[idx][-1])
+        try:
+            stagedists.append(variables.stagedists[idx][-1])
+        except:
+            stagedists = []
 
     pairs = variables.pairs[-1]
     centers = variables.centers[-1]
